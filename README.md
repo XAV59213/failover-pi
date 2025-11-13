@@ -54,6 +54,109 @@ avec Dashboard Web, sauvegardes, restauration et supervision.
 
 Cloner le dépôt :
 
-```bash
+bash
 git clone https://github.com/XAV59213/failover-pi.git
 cd failover-pi
+
+Lancer l’installateur :
+
+sudo bash install_failover_pi.sh
+
+Accéder au Dashboard :
+http://<IP_du_Pi>:5123
+
+🗂 Sauvegarde & Restauration
+Sauvegarde :
+
+→ Générée depuis le Dashboard (zip)
+→ Contient :
+
+fichiers Python
+
+config.json
+
+logs
+
+dashboard Flask complet
+
+utilisateurs
+
+scripts
+
+status_history.json
+
+Restauration :
+
+Upload .zip ou restauration d’un backup existant
+
+Le Pi redémarre automatiquement
+
+🔥 Services systemd
+Service	Rôle
+failover-monitor.service	supervise Freebox + SIM7600E
+failover-dashboard.service	interface web Flask
+
+sudo systemctl start failover-monitor
+sudo systemctl start failover-dashboard
+
+
+📡 API interne utilisée
+
+    /sms → test SMS
+
+    /reboot → relance module 4G
+
+    /reboot_pi → reboot Raspberry Pi
+
+    /backup → crée un zip
+
+    /restore → upload ZIP + reboot
+
+    /restore_existing/<name>
+
+    /test_failover
+
+    /clear_logs
+
+👥 Gestion utilisateurs
+
+Rôles :
+
+    admin : accès total
+
+    user : accès restreint
+
+        autorisé : Dashboard, Diagnostics
+
+        interdit : Backup/Restore, reboot, shutdown, gestion utilisateurs
+        Le fichier des comptes :
+        /home/xavier/.dashboard_users.json
+
+
+🧪 Diagnostics intégrés
+
+Affiche :
+
+    modules Python
+
+    binaires système
+
+    accès fichiers
+
+    état SIM7600E
+
+    force du signal
+
+    présence ttyUSB0/1/2/3
+
+    services systemd
+
+    permissions
+
+📎 Licence
+
+Projet personnel — utilisation libre.
+✨ Auteur
+
+Xavier
+        
