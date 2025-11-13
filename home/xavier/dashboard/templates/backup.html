@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>💾 Backups & Restauration</h2>
+
+<div class="card">
+    <h3>Sauvegardes disponibles</h3>
+    <ul>
+        {% for b in backups %}
+        <li><a class="btn" href="/backup/download/{{ b }}">⬇️ {{ b }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div class="card">
+    <h3>Créer une sauvegarde</h3>
+    <a class="btn" href="/backup/create">📦 Sauvegarder maintenant</a>
+</div>
+
+<div class="card">
+    <h3>Restaurer</h3>
+    <form action="/restore" method="post" enctype="multipart/form-data">
+        <input type="file" name="zipfile" required>
+        <button class="btn">♻️ Restaurer</button>
+    </form>
+</div>
+
+{% endblock %}
