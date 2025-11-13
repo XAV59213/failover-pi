@@ -107,8 +107,8 @@ apt-get install -y \
   python3 python3-pip python3-venv python3-serial python3-flask \
   jq libqmi-utils usb-modeswitch modemmanager
 
-pip3 install --upgrade pip
-pip3 install --upgrade flask pyserial
+# pip3 install --upgrade pip
+# pip3 install --upgrade flask pyserial
 
 # ---------------------------------------------------------
 # Génération secret key auto
