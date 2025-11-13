@@ -7,8 +7,29 @@ import time
 import zipfile
 import shutil
 
-from .utils import (log, get_gateway, get_signal, get_logs, list_backups, get_freebox_history, check_dependencies, load_config, save_config)
-from .auth import login_required, admin_required, load_users, save_users, make_password, check_password, verify_credentials, count_admins
+from .utils import (
+    log,
+    get_gateway,
+    get_signal,
+    get_logs,
+    list_backups,
+    get_freebox_history,
+    check_dependencies,
+    load_config,
+    save_config,
+)
+from .auth import (
+    login_required,
+    admin_required,
+    load_users,
+    save_users,
+    make_password,
+    check_password,
+    verify_credentials,
+    count_admins,
+    admin_exists,
+)
+
 
 def success_page(title, msg, color="#3fb950", btn_color="#58a6ff"):
     return f"""<div style="text-align:center;padding:40px;color:#fff;background:#0d1117;height:100vh">
@@ -16,18 +37,20 @@ def success_page(title, msg, color="#3fb950", btn_color="#58a6ff"):
         <p style="color:#8b949e">{msg}</p>
         <button onclick="location.href='/'" style="background:{btn_color};color:#fff;padding:12px 24px;border:none;border-radius:8px;margin-top:20px;cursor:pointer">Retour</button></div>"""
 
+
 def error_page(title, msg):
     return success_page(title, msg, color="#f85149", btn_color="#f85149")
+
 
 def topbar_html(active=""):
     username = session.get("user", {}).get("username", "")
     items = [
-        ('/', 'Dashboard'),
-        ('/diagnostics', 'Diagnostics'),
-        ('/config', 'Configuration'),
-        ('/account', 'Mon compte'),
-        ('/users', 'Utilisateurs') if session.get("user",{}).get("role")=="admin" else None,
-        ('/logout', 'Déconnexion')
+        ("/", "Dashboard"),
+        ("/diagnostics", "Diagnostics"),
+        ("/config", "Configuration"),
+        ("/account", "Mon compte"),
+        ("/users", "Utilisateurs") if session.get("user", {}).get("role") == "admin" else None,
+        ("/logout", "Déconnexion"),
     ]
     links = []
     for it in items:
@@ -43,17 +66,18 @@ def topbar_html(active=""):
     </div>
     """
 
+
 def register_routes(app):
     @app.route("/setup", methods=["GET", "POST"])
     def setup():
-        users_db = app.config['USERS_DB']
+        users_db = app.config["USERS_DB"]
         if admin_exists(users_db):
             return redirect(url_for("login"))
         error = ""
         if request.method == "POST":
             username = (request.form.get("username") or "").strip()
             password = request.form.get("password") or ""
-            confirm  = request.form.get("confirm") or ""
+            confirm = request.form.get("confirm") or ""
             if not username or not password:
                 error = "Utilisateur et mot de passe requis."
             elif password != confirm:
@@ -63,13 +87,15 @@ def register_routes(app):
                 if any(u.get("username") == username for u in data.get("users", [])):
                     error = "Ce nom d'utilisateur existe déjà."
                 else:
-                    data.setdefault("users", []).append({
-                        "username": username,
-                        "password": make_password(password),
-                        "role": "admin"
-                    })
+                    data.setdefault("users", []).append(
+                        {
+                            "username": username,
+                            "password": make_password(password),
+                            "role": "admin",
+                        }
+                    )
                     if save_users(data, users_db):
-                        log(f"[AUTH] Admin créé: {username}", app.config['LOG_FILE'])
+                        log(f"[AUTH] Admin créé: {username}", app.config["LOG_FILE"])
                         return redirect(url_for("login"))
                     error = "Impossible d'enregistrer l'utilisateur."
         html = f"""
@@ -97,7 +123,7 @@ def register_routes(app):
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
-        users_db = app.config['USERS_DB']
+        users_db = app.config["USERS_DB"]
         if not admin_exists(users_db):
             return redirect(url_for("setup"))
         error = ""
@@ -107,7 +133,7 @@ def register_routes(app):
             user = verify_credentials(username, password, users_db)
             if user:
                 session["user"] = {"username": user["username"], "role": user.get("role", "admin")}
-                log(f"[AUTH] Connexion: {user['username']}", app.config['LOG_FILE'])
+                log(f"[AUTH] Connexion: {user['username']}", app.config["LOG_FILE"])
                 return redirect(url_for("index"))
             else:
                 error = "Identifiants invalides."
@@ -139,30 +165,38 @@ def register_routes(app):
     def logout():
         u = session.get("user", {}).get("username", "?")
         session.clear()
-        log(f"[AUTH] Déconnexion: {u}", app.config['LOG_FILE'])
+        log(f"[AUTH] Déconnexion: {u}", app.config["LOG_FILE"])
         return redirect(url_for("login"))
 
-    @app.route('/')
+    @app.route("/")
     @login_required
     def index():
-        gateway, color = get_gateway(app.config['CONFIG_FILE'])
-        log(f"[DASHBOARD] {gateway}", app.config['LOG_FILE'])
+        gateway, color = get_gateway(app.config["CONFIG_FILE"])
+        log(f"[DASHBOARD] {gateway}", app.config["LOG_FILE"])
         signal, percent, _ = get_signal()
-        logs = get_logs(app.config['LOG_FILE'])
-        backups = list_backups(app.config['BACKUP_DIR'])
-        times, states = get_freebox_history(app.config['LOG_FILE'])
+        logs = get_logs(app.config["LOG_FILE"])
+        backups = list_backups(app.config["BACKUP_DIR"])
+        times, states = get_freebox_history(app.config["LOG_FILE"])
         current_time = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
-        backups_html = ''.join([
-            f'<div class="backup-item">'
-            f'<a href="/download_backup/{b}" style="color:#58a6ff">{b}</a> '
-            f'<button onclick="if(confirm('Restaurer {b} et redémarrer Pi ?')) location.href='/restore_existing/{b}'" '
-            f'style="background:#3fb950;color:#fff;padding:4px 8px;border:none;border-radius:4px;margin-left:10px;cursor:pointer">Restaurer</button> '
-            f'<button onclick="if(confirm('Supprimer {b} ?')) location.href='/delete_backup/{b}'" '
-            f'style="background:#f85149;color:#fff;padding:4px 8px;border:none;border-radius:4px;margin-left:10px;cursor:pointer">Supprimer</button>'
-            f'</div>'
-            for b in backups
-        ])
+        backups_html = "".join(
+            [
+                (
+                    f'<div class="backup-item">'
+                    f'<a href="/download_backup/{b}" style="color:#58a6ff">{b}</a> '
+                    f'<button onclick="if(confirm(\'Restaurer {b} et redémarrer Pi ?\')) '
+                    f'location.href=\'/restore_existing/{b}\'" '
+                    f'style="background:#3fb950;color:#fff;padding:4px 8px;border:none;border-radius:4px;'
+                    f'margin-left:10px;cursor:pointer">Restaurer</button> '
+                    f'<button onclick="if(confirm(\'Supprimer {b} ?\')) '
+                    f'location.href=\'/delete_backup/{b}\'" '
+                    f'style="background:#f85149;color:#fff;padding:4px 8px;border:none;border-radius:4px;'
+                    f'margin-left:10px;cursor:pointer">Supprimer</button>'
+                    f"</div>"
+                )
+                for b in backups
+            ]
+        )
 
         html = f"""
         <!DOCTYPE html>
@@ -261,19 +295,23 @@ def register_routes(app):
         """
         return render_template_string(html)
 
-    @app.route('/sms')
+    @app.route("/sms")
     @login_required
     def sms():
         msg = f"Test dashboard OK ! ({datetime.now().strftime('%d/%m/%Y')})"
-        log_entry = log(f"[DASHBOARD] SMS Test → {msg}", app.config['LOG_FILE'])
+        log_entry = log(f"[DASHBOARD] SMS Test → {msg}", app.config["LOG_FILE"])
         try:
-            subprocess.run(["python3", app.config['SMS_SCRIPT'], msg], cwd="/home/xavier", timeout=10)
+            subprocess.run(
+                ["python3", app.config["SMS_SCRIPT"], msg],
+                cwd="/home/xavier",
+                timeout=10,
+            )
             return success_page("SMS Envoyé !", log_entry, color="#3fb950", btn_color="#58a6ff")
         except Exception as e:
-            error = log(f"[DASHBOARD] Erreur SMS: {e}", app.config['LOG_FILE'])
+            error = log(f"[DASHBOARD] Erreur SMS: {e}", app.config["LOG_FILE"])
             return error_page("Échec SMS", error)
 
-    @app.route('/diagnostics')
+    @app.route("/diagnostics")
     @login_required
     def diagnostics():
         checks = check_dependencies(app.config)
@@ -282,14 +320,20 @@ def register_routes(app):
         html_rows = []
         for c in checks:
             badge = "<span style='color:#3fb950'>OK</span>" if c["ok"] else "<span style='color:#f85149'>KO</span>"
-            detail = c["detail"].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;") if c["detail"] else ""
-            html_rows.append(f"""
+            detail = (
+                c["detail"].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                if c["detail"]
+                else ""
+            )
+            html_rows.append(
+                f"""
                 <tr>
                   <td style="padding:8px 12px;border-bottom:1px solid #30363d">{c['name']}</td>
                   <td style="padding:8px 12px;border-bottom:1px solid #30363d;text-align:center">{badge}</td>
                   <td style="padding:8px 12px;border-bottom:1px solid #30363d;font-family:monospace;color:#8b949e">{detail}</td>
                 </tr>
-            """)
+            """
+            )
         html = f"""
         <html lang="fr"><head><meta charset="utf-8">
         <title>Diagnostics</title>
@@ -328,4 +372,12 @@ def register_routes(app):
         """
         return render_template_string(html)
 
-    # Ajoutez les autres routes ici, en utilisant les codes fournis dans les messages précédents pour compléter.
+    # À compléter ensuite :
+    # - /reboot
+    # - /reboot_pi
+    # - /shutdown
+    # - /backup
+    # - /restore
+    # - /restore_existing/<name>
+    # - /delete_backup/<name>
+    # - /config, /account, /users, etc.
