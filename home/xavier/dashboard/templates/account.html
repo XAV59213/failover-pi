@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>🔐 Modifier mon mot de passe</h2>
+
+<form method="post">
+    <input type="password" name="old_pass" placeholder="Ancien mot de passe" required>
+    <input type="password" name="new_pass" placeholder="Nouveau mot de passe" required>
+    <button class="btn">Mettre à jour</button>
+</form>
+
+{% if msg %}
+<p style="color:lightgreen">{{ msg }}</p>
+{% endif %}
+{% if error %}
+<p style="color:red">{{ error }}</p>
+{% endif %}
+{% endblock %}
