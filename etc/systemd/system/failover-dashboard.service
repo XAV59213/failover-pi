@@ -5,11 +5,17 @@ After=network.target
 [Service]
 User=xavier
 Group=xavier
+
+# Secret Key injectée au moment de l'installation
 Environment="DASH_SECRET_KEY=your_generated_key"
+
+# Lancement du Dashboard Flask
 ExecStart=/usr/bin/python3 /home/xavier/run_dashboard.py
+
 Restart=always
 RestartSec=10
 
 [Install]
 WantedBy=multi-user.target
+
 
