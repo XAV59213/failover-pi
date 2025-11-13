@@ -68,6 +68,47 @@ def topbar_html(active=""):
 
 
 def register_routes(app):
+
+    # ----------------------------------------------------------------------
+    # Helpers internes
+    # ----------------------------------------------------------------------
+    def _restore_from_zip(zip_path: str):
+        """Restaure les fichiers du backup dans /home/xavier à partir du ZIP."""
+        base_home = "/home/xavier"
+        if not os.path.exists(zip_path):
+            raise FileNotFoundError(zip_path)
+
+        with zipfile.ZipFile(zip_path, "r") as z:
+            for member in z.namelist():
+                # On ne restaure que ce qui est sous home/xavier/
+                if not member.startswith("home/xavier/"):
+                    continue
+                rel = member[len("home/xavier/") :].lstrip("/")
+                if not rel:  # entrée vide
+                    continue
+                dest_path = os.path.join(base_home, rel)
+
+                if member.endswith("/"):
+                    os.makedirs(dest_path, exist_ok=True)
+                    continue
+
+                os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+                with z.open(member) as src, open(dest_path, "wb") as dst:
+                    shutil.copyfileobj(src, dst)
+
+        # On remet les exécutables principaux
+        for path in [
+            os.path.join(base_home, "connect_4g.sh"),
+            os.path.join(base_home, "monitor_failover.py"),
+            os.path.join(base_home, "run_dashboard.py"),
+            os.path.join(base_home, "send_sms.py"),
+        ]:
+            if os.path.exists(path):
+                os.chmod(path, os.stat(path).st_mode | 0o111)
+
+    # ----------------------------------------------------------------------
+    # Auth / setup
+    # ----------------------------------------------------------------------
     @app.route("/setup", methods=["GET", "POST"])
     def setup():
         users_db = app.config["USERS_DB"]
@@ -168,6 +209,9 @@ def register_routes(app):
         log(f"[AUTH] Déconnexion: {u}", app.config["LOG_FILE"])
         return redirect(url_for("login"))
 
+    # ----------------------------------------------------------------------
+    # Dashboard principal
+    # ----------------------------------------------------------------------
     @app.route("/")
     @login_required
     def index():
@@ -295,6 +339,9 @@ def register_routes(app):
         """
         return render_template_string(html)
 
+    # ----------------------------------------------------------------------
+    # Actions simples : SMS, reboot 4G, test failover, clear logs
+    # ----------------------------------------------------------------------
     @app.route("/sms")
     @login_required
     def sms():
@@ -311,6 +358,198 @@ def register_routes(app):
             error = log(f"[DASHBOARD] Erreur SMS: {e}", app.config["LOG_FILE"])
             return error_page("Échec SMS", error)
 
+    @app.route("/reboot")
+    @login_required
+    def reboot_4g():
+        log_entry = log("[ACTION] Reboot 4G demandé via dashboard", app.config["LOG_FILE"])
+        try:
+            # Relance le script de connexion 4G
+            subprocess.Popen(["/home/xavier/connect_4g.sh"])
+            return success_page("Redémarrage 4G", f"Commande lancée.<br><small>{log_entry}</small>")
+        except Exception as e:
+            error = log(f"[ERROR] Reboot 4G: {e}", app.config["LOG_FILE"])
+            return error_page("Erreur Reboot 4G", error)
+
+    @app.route("/test_failover")
+    @login_required
+    def test_failover():
+        gateway, _ = get_gateway(app.config["CONFIG_FILE"])
+        msg = f"Test failover manuel - état: {gateway} ({datetime.now().strftime('%d/%m/%Y %H:%M:%S')})"
+        log_entry = log(f"[TEST] {msg}", app.config["LOG_FILE"])
+        try:
+            subprocess.run(
+                ["python3", app.config["SMS_SCRIPT"], msg],
+                cwd="/home/xavier",
+                timeout=10,
+            )
+            return success_page("Test Failover", f"SMS envoyé.<br><small>{log_entry}</small>")
+        except Exception as e:
+            error = log(f"[TEST] Erreur test failover: {e}", app.config["LOG_FILE"])
+            return error_page("Erreur Test Failover", error)
+
+    @app.route("/clear_logs")
+    @admin_required
+    def clear_logs():
+        try:
+            # On vide le log
+            open(app.config["LOG_FILE"], "w").close()
+            # On réinitialise l'historique Freebox
+            history_file = "/home/xavier/status_history.json"
+            with open(history_file, "w") as f:
+                f.write('{"times":[],"states":[]}')
+            log_entry = log("[ACTION] Logs effacés via dashboard", app.config["LOG_FILE"])
+            return success_page("Logs effacés", log_entry)
+        except Exception as e:
+            error = log(f"[ERROR] Clear logs: {e}", app.config["LOG_FILE"])
+            return error_page("Erreur Clear Logs", error)
+
+    # ----------------------------------------------------------------------
+    # Backup / Restore
+    # ----------------------------------------------------------------------
+    @app.route("/backup")
+    @admin_required
+    def backup():
+        ts = datetime.now().strftime("%Y%m%d-%H%M%S")
+        backup_name = f"failoverpi-backup-{ts}.zip"
+        backup_path = os.path.join(app.config["BACKUP_DIR"], backup_name)
+        base_home = "/home/xavier"
+
+        try:
+            with zipfile.ZipFile(backup_path, "w", zipfile.ZIP_DEFLATED) as z:
+
+                def add_if_exists(path, arcname=None):
+                    if os.path.exists(path):
+                        z.write(path, arcname or path)
+
+                # Fichiers principaux
+                add_if_exists(os.path.join(base_home, "config.json"), "home/xavier/config.json")
+                add_if_exists(os.path.join(base_home, "monitor_failover.py"), "home/xavier/monitor_failover.py")
+                add_if_exists(os.path.join(base_home, "run_dashboard.py"), "home/xavier/run_dashboard.py")
+                add_if_exists(os.path.join(base_home, "send_sms.py"), "home/xavier/send_sms.py")
+                add_if_exists(os.path.join(base_home, "connect_4g.sh"), "home/xavier/connect_4g.sh")
+                add_if_exists(os.path.join(base_home, "status_history.json"), "home/xavier/status_history.json")
+                add_if_exists(os.path.join(base_home, "monitor.log"), "home/xavier/monitor.log")
+                add_if_exists(os.path.join(base_home, ".dashboard_users.json"), "home/xavier/.dashboard_users.json")
+
+                # Dossier dashboard complet
+                dash_dir = os.path.join(base_home, "dashboard")
+                if os.path.isdir(dash_dir):
+                    for root, dirs, files in os.walk(dash_dir):
+                        for f in files:
+                            full = os.path.join(root, f)
+                            rel = os.path.relpath(full, base_home)
+                            arc = os.path.join("home/xavier", rel)
+                            z.write(full, arc)
+
+            log_entry = log(f"[BACKUP] Backup créé: {backup_name}", app.config["LOG_FILE"])
+            return success_page("Backup créé", f"Fichier : {backup_name}<br><small>{log_entry}</small>")
+        except Exception as e:
+            error = log(f"[BACKUP] Erreur backup: {e}", app.config["LOG_FILE"])
+            return error_page("Erreur Backup", error)
+
+    @app.route("/download_backup/<name>")
+    @login_required
+    def download_backup(name):
+        safe_name = os.path.basename(name)
+        path = os.path.join(app.config["BACKUP_DIR"], safe_name)
+        if not os.path.exists(path):
+            return error_page("Backup introuvable", safe_name)
+        return send_file(path, as_attachment=True)
+
+    @app.route("/delete_backup/<name>")
+    @admin_required
+    def delete_backup(name):
+        safe_name = os.path.basename(name)
+        path = os.path.join(app.config["BACKUP_DIR"], safe_name)
+        if not os.path.exists(path):
+            return error_page("Backup introuvable", safe_name)
+        try:
+            os.remove(path)
+            log_entry = log(f"[BACKUP] Backup supprimé: {safe_name}", app.config["LOG_FILE"])
+            return success_page("Backup supprimé", log_entry)
+        except Exception as e:
+            error = log(f"[BACKUP] Erreur suppression backup: {e}", app.config["LOG_FILE"])
+            return error_page("Erreur Suppression Backup", error)
+
+    @app.route("/restore", methods=["POST"])
+    @admin_required
+    def restore():
+        file = request.files.get("backup_file")
+        if not file:
+            return error_page("Aucun fichier", "Aucun fichier de backup fourni.")
+        if not file.filename.lower().endswith(".zip"):
+            return error_page("Format invalide", "Le fichier doit être un .zip")
+
+        upload_dir = app.config["UPLOAD_DIR"]
+        os.makedirs(upload_dir, exist_ok=True)
+        dest_path = os.path.join(upload_dir, f"upload-{int(time.time())}.zip")
+        file.save(dest_path)
+
+        try:
+            _restore_from_zip(dest_path)
+            log_entry = log(f"[RESTORE] Backup restauré depuis upload: {os.path.basename(dest_path)}", app.config["LOG_FILE"])
+        except Exception as e:
+            error = log(f"[RESTORE] Erreur restauration: {e}", app.config["LOG_FILE"])
+            return error_page("Erreur Restauration", error)
+
+        # On lance un reboot du Pi
+        try:
+            subprocess.Popen(["sudo", "reboot"])
+        except Exception as e:
+            log(f"[RESTORE] Erreur lors du reboot: {e}", app.config["LOG_FILE"])
+
+        return success_page("Restauration en cours", f"Backup restauré, le Pi va redémarrer.<br><small>{log_entry}</small>")
+
+    @app.route("/restore_existing/<name>")
+    @admin_required
+    def restore_existing(name):
+        safe_name = os.path.basename(name)
+        path = os.path.join(app.config["BACKUP_DIR"], safe_name)
+        if not os.path.exists(path):
+            return error_page("Backup introuvable", safe_name)
+
+        try:
+            _restore_from_zip(path)
+            log_entry = log(f"[RESTORE] Backup restauré: {safe_name}", app.config["LOG_FILE"])
+        except Exception as e:
+            error = log(f"[RESTORE] Erreur restauration: {e}", app.config["LOG_FILE"])
+            return error_page("Erreur Restauration", error)
+
+        try:
+            subprocess.Popen(["sudo", "reboot"])
+        except Exception as e:
+            log(f"[RESTORE] Erreur lors du reboot: {e}", app.config["LOG_FILE"])
+
+        return success_page("Restauration en cours", f"Backup {safe_name} restauré, le Pi va redémarrer.<br><small>{log_entry}</small>")
+
+    # ----------------------------------------------------------------------
+    # Reboot / shutdown du Pi
+    # ----------------------------------------------------------------------
+    @app.route("/reboot_pi")
+    @admin_required
+    def reboot_pi():
+        log_entry = log("[ACTION] Reboot Pi demandé via dashboard", app.config["LOG_FILE"])
+        try:
+            subprocess.Popen(["sudo", "reboot"])
+            return success_page("Reboot Pi", f"Redémarrage en cours...<br><small>{log_entry}</small>")
+        except Exception as e:
+            error = log(f"[ERROR] Reboot Pi: {e}", app.config["LOG_FILE"])
+            return error_page("Erreur Reboot Pi", error)
+
+    @app.route("/shutdown")
+    @admin_required
+    def shutdown_pi():
+        log_entry = log("[ACTION] Shutdown Pi demandé via dashboard", app.config["LOG_FILE"])
+        try:
+            subprocess.Popen(["sudo", "shutdown", "-h", "now"])
+            return success_page("Shutdown Pi", f"Arrêt en cours...<br><small>{log_entry}</small>")
+        except Exception as e:
+            error = log(f"[ERROR] Shutdown Pi: {e}", app.config["LOG_FILE"])
+            return error_page("Erreur Shutdown Pi", error)
+
+    # ----------------------------------------------------------------------
+    # Diagnostics
+    # ----------------------------------------------------------------------
     @app.route("/diagnostics")
     @login_required
     def diagnostics():
@@ -372,12 +611,7 @@ def register_routes(app):
         """
         return render_template_string(html)
 
-    # À compléter ensuite :
-    # - /reboot
-    # - /reboot_pi
-    # - /shutdown
-    # - /backup
-    # - /restore
-    # - /restore_existing/<name>
-    # - /delete_backup/<name>
-    # - /config, /account, /users, etc.
+    # À compléter plus tard si tu veux :
+    # - /config : édition de config.json (gateway, APN, etc.)
+    # - /account : changement de mot de passe utilisateur
+    # - /users : gestion multi-utilisateurs / rôles
