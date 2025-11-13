@@ -144,4 +144,3 @@ echo "  sudo systemctl start failover-monitor.service"
 echo
 echo "Ensuite, ouvre ton navigateur sur : http://<ip_du_pi>:5123/"
 echo "La première fois, tu passeras par /setup pour créer le compte admin."
-
