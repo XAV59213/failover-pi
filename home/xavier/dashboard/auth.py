@@ -20,7 +20,7 @@ def load_users(users_db: str):
     try:
         with open(users_db, "r") as f:
             return json.load(f)
-    except:
+    except Exception:
         return {"users": []}
 
 
@@ -31,7 +31,7 @@ def save_users(data, users_db: str):
             json.dump(data, f, indent=2)
         os.replace(tmp, users_db)
         return True
-    except:
+    except Exception:
         return False
 
 
@@ -53,7 +53,7 @@ def check_password(stored: str, plain: str) -> bool:
         salt = base64.b64decode(salt_b64.encode())
         h2 = hashlib.sha256(salt + plain.encode("utf-8")).hexdigest()
         return h2 == h_hex
-    except:
+    except Exception:
         return False
 
 
@@ -111,43 +111,70 @@ def register_auth_guards(app):
     @app.before_request
     def enforce_auth():
         endpoint = (request.endpoint or "")
+        path = request.path or "/"
 
-        # Routes publiques
+        # 1) Routes publiques (login / setup / static)
         if endpoint in ALLOWED_ENDPOINTS_NO_AUTH:
             return
 
-        # Tant qu'aucun admin n'existe → forcer /setup
+        # 2) Tant qu'aucun admin n'existe → forcer /setup
         if not admin_exists(app.config["USERS_DB"]):
             if endpoint != "setup":
                 return redirect(url_for("setup"))
             return
 
-        # Si pas connecté → login
+        # 3) Si pas connecté → login
         if not session.get("user"):
             return redirect(url_for("login"))
 
-        # =====================================================
-        # Restrictions pour le rôle "user"
-        # =====================================================
-        if session["user"].get("role") == "user":
-
-            # INTERDITS pour les utilisateurs simples :
+        # 4) Restrictions pour le rôle "user"
+        user = session.get("user", {})
+        if user.get("role") == "user":
+            # Endpoints sensibles à bloquer pour les users simples
             blocked_endpoints = {
-                # Diagnostics avancés
-                "diagnostics",
+                # Diagnostics avancés (si tu veux les bloquer – sinon supprime "diagnostics")
+                # "diagnostics",
 
-                # Backups
-                "backup",
+                # Backups / restore
+                "backup",          # si tu as une route def backup()
+                "backup_page",     # si tu utilises une page dédiée
                 "restore",
                 "restore_existing",
                 "delete_backup",
 
-                # Actions système
+                # Gestion utilisateurs
+                "users_page",
+                "users_create",
+                "users_delete",
+
+                # Config avancée
+                "config_page",
+
+                # Actions systèmes
                 "reboot_pi",
-                "shutdown",
                 "shutdown_pi",
-                "reboot",
+                "reboot_4g",
+                "clear_logs",
             }
 
+            # Patterns d'URL à bloquer (plus robuste que les endpoints seuls)
+            blocked_paths_prefix = (
+                "/backup",
+                "/restore",
+                "/users",
+                "/config",
+                "/reboot_pi",
+                "/shutdown",
+                "/shutdown_pi",
+                "/reboot",        # reboot 4G si route /reboot
+                "/logs/clear",    # au cas où tu ajoutes une URL de clear logs
+            )
+
+            # Si l'endpoint est explicitement bloqué
             if endpoint in blocked_endpoints:
                 return redirect(url_for("index"))
+
+            # Si le chemin commence par un préfixe sensible
+            for pref in blocked_paths_prefix:
+                if path.startswith(pref):
+                    return redirect(url_for("index"))
