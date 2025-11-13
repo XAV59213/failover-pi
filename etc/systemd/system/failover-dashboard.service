@@ -1,0 +1,14 @@
+[Unit]
+Description=Failover Dashboard Service
+After=network.target
+
+[Service]
+User=xavier
+Group=xavier
+Environment="DASH_SECRET_KEY=your_generated_key"
+ExecStart=/usr/bin/python3 /home/xavier/run_dashboard.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
