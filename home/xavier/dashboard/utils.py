@@ -7,14 +7,26 @@ import zipfile
 import shutil
 import stat
 
+
+# ============================================================================
+# SMALL HELPERS
+# ============================================================================
+
 def run(cmd: str) -> str:
+    """
+    Run a shell command and return stdout or "N/A".
+    """
     try:
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=6)
         return result.stdout.strip() if result.returncode == 0 else "N/A"
     except Exception:
         return "N/A"
 
+
 def log(msg: str, log_file: str) -> str:
+    """
+    Append an entry in log file + return it.
+    """
     entry = f"[{datetime.now().strftime('%H:%M:%S')}] {msg}"
     try:
         with open(log_file, "a") as f:
@@ -22,6 +34,11 @@ def log(msg: str, log_file: str) -> str:
     except Exception:
         pass
     return entry
+
+
+# ============================================================================
+# CONFIG
+# ============================================================================
 
 def load_config(config_file: str):
     default = {
@@ -42,7 +59,11 @@ def load_config(config_file: str):
             pass
     return default
 
+
 def save_config(data, config_file: str):
+    """
+    Write atomically to avoid corrupted config.
+    """
     try:
         tmp = config_file + ".tmp"
         with open(tmp, "w") as f:
@@ -52,69 +73,113 @@ def save_config(data, config_file: str):
     except Exception:
         return False
 
+
+# ============================================================================
+# NETWORK STATUS
+# ============================================================================
+
 def get_gateway(config_file: str):
+    """
+    Detects if default route is Freebox (eth0) or 4G (wwan0).
+    Returns (status_text, color)
+    """
     config = load_config(config_file)
     gateway_ip = config.get("gateway", "192.168.0.254")
+
     route = run("ip route show default")
+
     if gateway_ip in route and "eth0" in route:
         return "Freebox OK", "green"
     elif "wwan0" in route:
         return "4G ACTIVE", "red"
     return "Inconnu", "gray"
 
+
 def get_signal():
+    """
+    Return (rssi_str, percent, color)
+    """
     raw = run("qmicli -d /dev/cdc-wdm0 --nas-get-signal-strength 2>/dev/null | grep rssi")
-    if not raw or "N/A" in raw:
+    if not raw or raw == "N/A":
         return "Non connecté", 0, "gray"
+
     try:
+        # Extract RSSI between single quotes
         rssi = float(raw.split("'")[1].split()[0])
         percent = max(0, min(100, int((rssi + 110) * 2.5)))
+
         color = "green" if rssi > -70 else "orange" if rssi > -90 else "red"
         return f"{rssi} dBm", percent, color
+
     except Exception:
         return "Erreur", 0, "gray"
 
+
+# ============================================================================
+# LOGS / BACKUPS / HISTORY
+# ============================================================================
+
 def get_logs(log_file: str):
-    if os.path.exists(log_file):
-        try:
-            with open(log_file) as f:
-                return [l.strip() for l in f.readlines()[-8:] if l.strip()]
-        except Exception:
-            return ["Erreur log"]
-    return ["Aucun log"]
+    if not os.path.exists(log_file):
+        return ["Aucun log"]
+    try:
+        with open(log_file) as f:
+            return [l.strip() for l in f.readlines()[-8:] if l.strip()]
+    except Exception:
+        return ["Erreur lecture logs"]
+
 
 def list_backups(backup_dir: str):
     try:
-        return sorted([f for f in os.listdir(backup_dir) if f.endswith('.zip')], reverse=True)[:10]
+        return sorted([f for f in os.listdir(backup_dir) if f.endswith(".zip")], reverse=True)[:10]
     except Exception:
         return []
 
+
 def get_freebox_history(log_file: str):
+    """
+    Parse log file to produce the 24h graph for Freebox VS 4G.
+    """
     if not os.path.exists(log_file):
         return [], []
+
     times, states = [], []
     try:
         with open(log_file) as f:
             lines = f.readlines()
+
         for line in lines[-500:]:
             if "Freebox OK" in line or "4G ACTIVE" in line:
                 try:
                     time_part = line.split("]")[0].replace("[", "").strip()
                 except Exception:
                     continue
-                states.append(1 if "Freebox OK" in line else 0)
+
+                state = 1 if "Freebox OK" in line else 0
                 times.append(time_part)
+                states.append(state)
+
         return times, states
+
     except Exception:
         return [], []
+
+
+# ============================================================================
+# DEPENDENCIES CHECK
+# ============================================================================
 
 def which_cmd(cmd: str):
     return shutil.which(cmd)
 
+
 def is_writable(path: str) -> bool:
+    """
+    Verify write permission on directory or file.
+    """
     try:
         if os.path.isdir(path):
-            testfile = os.path.join(path, ".writetest")
+            testfile = os.path.join(path, ".testwrite")
             with open(testfile, "w") as f:
                 f.write("ok")
             os.remove(testfile)
@@ -125,10 +190,13 @@ def is_writable(path: str) -> bool:
                     f.write("")
                 os.remove(path)
                 return True
+
             with open(path, "a"):
-                return True
+                pass
+            return True
     except Exception:
         return False
+
 
 def is_executable(path: str) -> bool:
     try:
@@ -137,13 +205,17 @@ def is_executable(path: str) -> bool:
     except Exception:
         return False
 
+
 def check_dependencies(app_config: dict):
+    """
+    Full diagnostic module used on /diagnostics
+    """
     checks = []
 
     def add(name, ok, detail=""):
         checks.append({"name": name, "ok": bool(ok), "detail": detail})
 
-    # Modules Python
+    # Python modules
     modules = [
         ("flask", "from flask import Flask"),
         ("json", "import json"),
@@ -160,48 +232,54 @@ def check_dependencies(app_config: dict):
         except Exception as e:
             add(f"Module Python: {mod}", False, str(e))
 
-    # Binaires système
+    # System binaries
     for bin_ in ["qmicli", "ip", "ping", "zip", "unzip", "crontab", "systemctl", "fuser"]:
-        path = which_cmd(bin_)
-        add(f"Binaire: {bin_}", path is not None, path or "absent")
+        p = which_cmd(bin_)
+        add(f"Binaire: {bin_}", p is not None, p or "absent")
 
-    # Fichiers / permissions
+    # Files & permissions
     add("Fichier SMS_SCRIPT", os.path.exists(app_config['SMS_SCRIPT']), app_config['SMS_SCRIPT'])
-    add("Dossier du LOG_FILE inscriptible", is_writable(os.path.dirname(app_config['LOG_FILE'])), os.path.dirname(app_config['LOG_FILE']))
+    add("Dossier du LOG_FILE inscriptible",
+        is_writable(os.path.dirname(app_config['LOG_FILE'])),
+        os.path.dirname(app_config['LOG_FILE']))
     add("Dossier BACKUP_DIR", os.path.isdir(app_config['BACKUP_DIR']), app_config['BACKUP_DIR'])
     add("BACKUP_DIR inscriptible", is_writable(app_config['BACKUP_DIR']), app_config['BACKUP_DIR'])
     add("Dossier UPLOAD_DIR", os.path.isdir(app_config['UPLOAD_DIR']), app_config['UPLOAD_DIR'])
     add("UPLOAD_DIR inscriptible", is_writable(app_config['UPLOAD_DIR']), app_config['UPLOAD_DIR'])
 
-    for path in ["/home/xavier/monitor_failover.py",
-                 "/home/xavier/connect_4g.sh",
-                 "/home/xavier/run_dashboard.py",
-                 "/home/xavier/send_sms.py"]:
-        if os.path.exists(path):
-            add(f"Présence: {os.path.basename(path)}", True, path)
-            if path.endswith((".sh", ".py")):
-                add(f"Executable: {os.path.basename(path)}", is_executable(path), path)
+    # Presence of failover files
+    for p in [
+        "/home/xavier/monitor_failover.py",
+        "/home/xavier/connect_4g.sh",
+        "/home/xavier/run_dashboard.py",
+        "/home/xavier/send_sms.py",
+    ]:
+        if os.path.exists(p):
+            add(f"Présence: {os.path.basename(p)}", True, p)
+            add(f"Executable: {os.path.basename(p)}", is_executable(p), p)
         else:
-            add(f"Présence: {os.path.basename(path)}", False, path)
+            add(f"Présence: {os.path.basename(p)}", False, p)
 
-    # Matériel / réseau
+    # Hardware
     add("Périphérique /dev/cdc-wdm0", os.path.exists("/dev/cdc-wdm0"), "/dev/cdc-wdm0")
     wwan_present = "wwan0" in (run("ip -o link") or "")
     add("Interface wwan0", wwan_present, run("ip -o link"))
 
-    # Services systemd
+    # Systemd services
     for svc in ["failover-dashboard.service", "failover-monitor.service"]:
         state = run(f"systemctl is-active {svc}")
-        ok = state.strip() in ("active", "activating")
-        add(f"Service {svc}", ok, state.strip() or "inconnu")
+        add(f"Service {svc}", state in ("active", "activating"), state or "inconnu")
 
-    # NOUVEAU : Vérification module SIM7600E
-    add("Module SIM7600E (lsusb)", "1e0e" in run("lsusb") or "Simcom" in run("lsusb"), run("lsusb"))
-    add("Port série (ttyUSB*)", any(os.path.exists(f"/dev/ttyUSB{i}") for i in range(5)), run("ls /dev/ttyUSB*"))
+    # SIM7600 check
+    usb = run("lsusb")
+    add("Module SIM7600E (lsusb)", "1e0e" in usb or "Simcom" in usb, usb)
 
-    # NOUVEAU : Vérification signal SIM7600E
+    # Serial ports
+    ports = run("ls /dev/ttyUSB*")
+    add("Port série (ttyUSB*)", "/dev/ttyUSB" in ports, ports)
+
+    # Signal
     signal, _, color = get_signal()
-    signal_ok = color != "gray" and color != "red"  # OK si green/orange (> -90 dBm)
-    add("Signal SIM7600E", signal_ok, f"{signal} ({'OK' if signal_ok else 'Faible ou absent'})")
+    add("Signal SIM7600E", color != "gray", signal)
 
     return checks
