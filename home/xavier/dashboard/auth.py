@@ -80,7 +80,7 @@ def count_admins(users_db: str):
 
 
 # ============================================================
-#  Décorateurs
+#  Décorateurs simples
 # ============================================================
 
 def login_required(f):
@@ -103,7 +103,7 @@ def admin_required(f):
 
 
 # ============================================================
-#  Règles d’accès dynamiques
+#  Garde globale (before_request)
 # ============================================================
 
 def register_auth_guards(app):
@@ -113,11 +113,11 @@ def register_auth_guards(app):
         endpoint = (request.endpoint or "")
         path = request.path or "/"
 
-        # 1) Routes publiques (login / setup / static)
+        # 1) Routes publiques
         if endpoint in ALLOWED_ENDPOINTS_NO_AUTH:
             return
 
-        # 2) Tant qu'aucun admin n'existe → forcer /setup
+        # 2) Tant qu'il n'y a pas d'admin → forcer /setup
         if not admin_exists(app.config["USERS_DB"]):
             if endpoint != "setup":
                 return redirect(url_for("setup"))
@@ -132,49 +132,46 @@ def register_auth_guards(app):
         if user.get("role") == "user":
             # Endpoints sensibles à bloquer pour les users simples
             blocked_endpoints = {
-                # Diagnostics avancés (si tu veux les bloquer – sinon supprime "diagnostics")
-                # "diagnostics",
+                # Diagnostics avancés
+                "diagnostics",
 
                 # Backups / restore
-                "backup",          # si tu as une route def backup()
-                "backup_page",     # si tu utilises une page dédiée
+                "backup",
                 "restore",
                 "restore_existing",
                 "delete_backup",
 
                 # Gestion utilisateurs
-                "users_page",
-                "users_create",
-                "users_delete",
+                "users",
 
-                # Config avancée
-                "config_page",
+                # Config réseau / modem
+                "edit_config",
 
-                # Actions systèmes
+                # Actions système (Pi)
                 "reboot_pi",
                 "shutdown_pi",
-                "reboot_4g",
+
+                # Logs
                 "clear_logs",
             }
 
-            # Patterns d'URL à bloquer (plus robuste que les endpoints seuls)
+            # Patterns d'URL sensibles (sécurité supplémentaire)
             blocked_paths_prefix = (
                 "/backup",
                 "/restore",
+                "/delete_backup",
                 "/users",
                 "/config",
                 "/reboot_pi",
                 "/shutdown",
-                "/shutdown_pi",
-                "/reboot",        # reboot 4G si route /reboot
-                "/logs/clear",    # au cas où tu ajoutes une URL de clear logs
+                "/clear_logs",
             )
 
-            # Si l'endpoint est explicitement bloqué
+            # 4.a – endpoint explicitement bloqué
             if endpoint in blocked_endpoints:
                 return redirect(url_for("index"))
 
-            # Si le chemin commence par un préfixe sensible
+            # 4.b – ou chemin qui commence par un préfixe sensible
             for pref in blocked_paths_prefix:
                 if path.startswith(pref):
                     return redirect(url_for("index"))
