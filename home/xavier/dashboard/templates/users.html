@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>👥 Gestion des utilisateurs</h2>
+
+<div class="card">
+    <h3>Créer un utilisateur</h3>
+    <form method="post" action="/users/create">
+        <input name="username" placeholder="Nom utilisateur">
+        <input name="password" placeholder="Mot de passe">
+        <select name="role">
+            <option value="user">Utilisateur</option>
+            <option value="admin">Admin</option>
+        </select>
+        <button class="btn">Créer</button>
+    </form>
+</div>
+
+<div class="card">
+    <h3>Liste des comptes</h3>
+    <table>
+        <tr><th>Nom</th><th>Rôle</th><th>Action</th></tr>
+
+        {% for u in users %}
+        <tr>
+            <td>{{ u.username }}</td>
+            <td>{{ u.role }}</td>
+            <td>
+                <a class="btn" href="/users/delete/{{ u.username }}">Supprimer</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% endblock %}
