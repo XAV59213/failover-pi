@@ -95,7 +95,26 @@ if [ -f "$REPO_DIR/etc/systemd/system/failover-monitor.service" ]; then
   cp "$REPO_DIR/etc/systemd/system/failover-monitor.service" "$SYSTEMD_DIR/"
 fi
 
-# 7) Génération automatique d'une DASH_SECRET_KEY si placeholder
+# 7) Installation des dépendances système (Debian / Ubuntu / Raspbian)
+echo "-> Installation des paquets nécessaires via apt..."
+
+apt-get update
+apt-get install -y \
+  python3 \
+  python3-pip \
+  python3-venv \
+  python3-serial \
+  python3-flask \
+  jq \
+  libqmi-utils
+
+# 8) Installation (ou mise à jour) des dépendances Python via pip
+echo "-> Installation des modules Python (pip)..."
+
+pip3 install --upgrade pip
+pip3 install --upgrade flask pyserial
+
+# 9) Génération automatique d'une DASH_SECRET_KEY si placeholder
 echo "-> Configuration de DASH_SECRET_KEY dans failover-dashboard.service..."
 
 if grep -q "your_generated_key" "$SYSTEMD_DIR/failover-dashboard.service"; then
@@ -109,25 +128,6 @@ EOF
 else
   echo "   DASH_SECRET_KEY déjà définie, laissé tel quel."
 fi
-
-# 8) Installation des dépendances système (Debian / Ubuntu / Raspbian)
-echo "-> Installation des paquets nécessaires via apt..."
-
-apt-get update
-apt-get install -y \
-  python3 \
-  python3-pip \
-  python3-venv \
-  python3-serial \
-  python3-flask \
-  jq \
-  qmicli
-
-# 9) Installation (ou mise à jour) des dépendances Python via pip
-echo "-> Installation des modules Python (pip)..."
-
-pip3 install --upgrade pip
-pip3 install --upgrade flask pyserial
 
 # 10) Activation des services
 echo "-> Activation des services failover-dashboard et failover-monitor..."
@@ -144,3 +144,4 @@ echo "  sudo systemctl start failover-monitor.service"
 echo
 echo "Ensuite, ouvre ton navigateur sur : http://<ip_du_pi>:5123/"
 echo "La première fois, tu passeras par /setup pour créer le compte admin."
+
