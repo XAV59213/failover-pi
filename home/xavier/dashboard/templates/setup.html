@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>🔧 Initialisation</h2>
+<p>Créer le compte administrateur :</p>
+
+<form method="post">
+    <input name="username" placeholder="Nom d'utilisateur admin" required>
+    <input name="password" type="password" placeholder="Mot de passe" required>
+    <button class="btn">Créer</button>
+</form>
+
+{% endblock %}
