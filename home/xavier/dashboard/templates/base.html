@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title or "Failover Dashboard" }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        body {
+            margin: 0;
+            background: #1f1f1f;
+            color: #e5e5e5;
+            font-family: Arial, sans-serif;
+        }
+        header {
+            background: #272727;
+            padding: 12px 20px;
+            border-bottom: 2px solid #333;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+        nav {
+            background: #202020;
+            padding: 10px;
+            display: flex;
+            gap: 12px;
+        }
+        nav a {
+            color: #ddd;
+            text-decoration: none;
+            padding: 6px 12px;
+            background: #333;
+            border-radius: 6px;
+        }
+        nav a:hover {
+            background: #444;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .card {
+            background: #2b2b2b;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid #3a3a3a;
+        }
+
+        .btn {
+            background: #3a6ea5;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #4c89d0;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            background: #1e1e1e;
+            color: #eee;
+            border: 1px solid #555;
+            border-radius: 5px;
+            margin-bottom: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+        td, th {
+            border-bottom: 1px solid #444;
+            padding: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+    </style>
+
+</head>
+<body>
+
+<header>
+    <h1>{{ title or "Failover Dashboard" }}</h1>
+</header>
+
+<nav>
+    <a href="{{ url_for('index') }}">🏠 Dashboard</a>
+    <a href="{{ url_for('backup_page') }}">💾 Backups</a>
+    <a href="{{ url_for('config_page') }}">⚙️ Config</a>
+    <a href="{{ url_for('diagnostics') }}">🔍 Diagnostics</a>
+    <a href="{{ url_for('users_page') }}">👥 Utilisateurs</a>
+    <a href="{{ url_for('account_page') }}">🔐 Compte</a>
+    <a href="{{ url_for('logout') }}">🚪 Déconnexion</a>
+</nav>
+
+<div class="container">
+    {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>
