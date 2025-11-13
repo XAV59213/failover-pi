@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>⚙️ Configuration réseau</h2>
+
+<form method="post">
+    <label>APN</label>
+    <input name="apn" value="{{ cfg.apn }}">
+
+    <label>PIN SIM</label>
+    <input name="sim_pin" value="{{ cfg.sim_pin }}">
+
+    <label>Numéro SMS</label>
+    <input name="sms_phone" value="{{ cfg.sms_phone }}">
+
+    <label>Gateway</label>
+    <input name="gateway" value="{{ cfg.gateway }}">
+
+    <label>Port Dashboard</label>
+    <input name="port" value="{{ cfg.port }}">
+
+    <label>Port Série SIM7600</label>
+    <input name="serial_port" value="{{ cfg.serial_port }}">
+
+    <button class="btn">💾 Enregistrer</button>
+</form>
+
+{% endblock %}
