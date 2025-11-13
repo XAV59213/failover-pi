@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>📡 État du système</h2>
+
+<div class="card">
+    <p><b>Route actuelle :</b> {{ gw_text }}</p>
+    <p><b>Signal SIM7600 :</b> {{ signal_text }} ({{ signal_percent }}%)</p>
+</div>
+
+<div class="card">
+    <h3>Derniers logs</h3>
+    <pre>{{ logs | join("\n") }}</pre>
+</div>
+
+<div class="card">
+    <h3>Actions</h3>
+    <a class="btn" href="/reboot_pi">🔄 Redémarrer le Raspberry</a>
+</div>
+{% endblock %}
