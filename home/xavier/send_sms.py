@@ -30,6 +30,30 @@ def fatal(msg):
     sys.exit(1)
 
 
+def get_recipients(cfg: dict):
+    """
+    Renvoie la liste des numéros à notifier.
+    Priorité :
+      1) cfg["sms_recipients"] si liste non vide
+      2) sinon cfg["sms_phone"] si défini
+    """
+    recips = cfg.get("sms_recipients")
+    if isinstance(recips, list) and recips:
+        cleaned = []
+        for r in recips:
+            r = str(r).strip()
+            if r:
+                cleaned.append(r)
+        if cleaned:
+            return cleaned
+
+    phone = (cfg.get("sms_phone") or "").strip()
+    if phone:
+        return [phone]
+
+    return []
+
+
 if __name__ == "__main__":
 
     if len(sys.argv) < 2:
@@ -38,9 +62,14 @@ if __name__ == "__main__":
     message = sys.argv[1]
     config = load_config()
 
-    phone = config.get("sms_phone", "+33XXXXXXXXX")
     serial_port = config.get("serial_port", "/dev/ttyUSB3")
     pin = config.get("sim_pin", "")
+
+    recipients = get_recipients(config)
+    if not recipients:
+        fatal("Aucun numéro SMS configuré (sms_recipients / sms_phone).")
+
+    print("Numéros cibles :", ", ".join(recipients))
 
     try:
         ser = serial.Serial(
@@ -69,21 +98,24 @@ if __name__ == "__main__":
         # Mode texte SMS
         send_at(ser, "AT+CMGF=1")
 
-        # Préparation SMS
-        ok, resp = send_at(ser, f'AT+CMGS="{phone}"', expected=">")
-        if not ok:
-            fatal("Erreur entrée mode SMS : " + resp)
+        # Envoi pour chaque destinataire
+        for phone in recipients:
+            print(f"Envoi SMS vers {phone}…")
+            ok, resp = send_at(ser, f'AT+CMGS="{phone}"', expected=">")
+            if not ok:
+                print("Erreur entrée mode SMS pour", phone, ":", resp)
+                continue
 
-        # Envoi message + CTRL+Z
-        ser.write((message + chr(26)).encode())
-        time.sleep(4)
-        resp = ser.read_all().decode(errors="ignore")
+            # Envoi message + CTRL+Z
+            ser.write((message + chr(26)).encode())
+            time.sleep(4)
+            resp = ser.read_all().decode(errors="ignore")
 
-        if "OK" in resp:
-            print("SMS envoyé :", message)
-        else:
-            print("Réponse modem :", resp)
-            fatal("Échec envoi SMS")
+            if "OK" in resp:
+                print("SMS envoyé à", phone)
+            else:
+                print("Réponse modem pour", phone, ":", resp)
+                print("Échec envoi SMS pour", phone)
 
     finally:
         ser.close()
