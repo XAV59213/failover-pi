@@ -47,7 +47,8 @@ def load_config(config_file: str):
     default = {
         "apn": "free",
         "sim_pin": "",
-        "sms_phone": "+33XXXXXXXXX",
+        "sms_phone": "+33XXXXXXXXX",    # numéro principal (compat)
+        "sms_recipients": [],           # liste de numéros à notifier
         "gateway": "192.168.0.254",
         "port": 5123,
         "serial_port": "/dev/ttyUSB3",
