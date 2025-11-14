@@ -935,7 +935,7 @@ def register_routes(app):
         return render_template_string(html)
 
     # ==============================================================
-    #  /config : édition APN, gateway, serial, PIN, port, téléphone
+    #  /config : édition APN, gateway, serial, PIN, port, téléphones
     # ==============================================================
     @app.route("/config", methods=["GET", "POST"])
     @admin_required
@@ -953,6 +953,20 @@ def register_routes(app):
                 cfg["gateway"] = request.form.get("gateway", cfg.get("gateway", "192.168.0.254")).strip()
                 cfg["serial_port"] = request.form.get("serial_port", cfg.get("serial_port", "/dev/ttyUSB3")).strip()
 
+                # Liste de numéros SMS (un par ligne)
+                raw_list = request.form.get("sms_recipients", "")
+                recipients = []
+                for line in raw_list.splitlines():
+                    line = line.strip()
+                    if line:
+                        recipients.append(line)
+
+                cfg["sms_recipients"] = recipients
+
+                # Si on a une liste, on peut utiliser le premier comme "principal"
+                if recipients:
+                    cfg["sms_phone"] = recipients[0]
+
                 port_str = request.form.get("port", str(cfg.get("port", 5123))).strip()
                 try:
                     cfg["port"] = int(port_str)
@@ -968,6 +982,13 @@ def register_routes(app):
 
             except Exception as e:
                 error = f"Erreur lors de la mise à jour : {e}"
+
+        # Pré-remplissage de la zone multi-numéros :
+        # si sms_recipients vide, on remplit avec sms_phone (s'il existe)
+        recipients_preview = "\n".join(
+            cfg.get("sms_recipients", [])
+            or ([cfg.get("sms_phone")] if cfg.get("sms_phone") else [])
+        )
 
         html = f"""
         <html lang="fr">
@@ -1000,7 +1021,7 @@ def register_routes(app):
               font-size:.9em;
               color:#8b949e;
             }}
-            input {{
+            input, textarea {{
               width:100%;
               padding:8px;
               margin-top:4px;
@@ -1008,6 +1029,10 @@ def register_routes(app):
               border:1px solid #30363d;
               background:#0d1117;
               color:#c9d1d9;
+            }}
+            textarea {{
+              resize:vertical;
+              min-height:70px;
             }}
             .btn {{
               margin-top:14px;
@@ -1045,8 +1070,11 @@ def register_routes(app):
                 <label>PIN de la carte SIM (laisser vide si désactivé)</label>
                 <input name="sim_pin" value="{cfg.get("sim_pin","")}">
 
-                <label>Numéro SMS de notification</label>
+                <label>Numéro SMS principal (optionnel)</label>
                 <input name="sms_phone" value="{cfg.get("sms_phone","+33XXXXXXXXX")}">
+
+                <label>Numéros à notifier (un par ligne)</label>
+                <textarea name="sms_recipients">{recipients_preview}</textarea>
 
                 <label>Gateway Freebox</label>
                 <input name="gateway" value="{cfg.get("gateway","192.168.0.254")}">
@@ -1065,6 +1093,7 @@ def register_routes(app):
         </html>
         """
         return render_template_string(html)
+
 
     # ==============================================================
     #  /account : changer son mot de passe
