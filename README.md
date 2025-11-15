@@ -29,7 +29,7 @@ avec Dashboard Web, sauvegardes, restauration et supervision.
   - **user** → accès limité (pas d’actions système sensibles)
 - HMAC prévu sur scripts sensibles (optionnel)
 - Secret key auto-générée → variable systemd
-
+![Dashboard - Nouvelle fonctionnalité](img/Capture%20d%E2%80%99%C3%A9cran%20du%202025-11-15%2019-17-25.png)
 ### 📦 **Installation automatique**
 - Script d’installation `install_failover_pi.sh`  
   - crée les répertoires  
