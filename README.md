@@ -47,6 +47,8 @@ avec Dashboard Web, sauvegardes, restauration et supervision.
 ![Raspberry Pi Setup](img/rasb.jpg)
 
 - Module 4G SIM7600E (USB)
+![Module SIM7600E-H](img/7600e.jpg)
+
 - Carte SIM Free Mobile (APN : `free`)
 - Connexion Freebox
 
