@@ -22,6 +22,8 @@ avec Dashboard Web, sauvegardes, restauration et supervision.
 - Gestion utilisateurs (Admin + Users limités)
 [Texte alternatif](img/Capture d’écran du 2025-11-15 18-58-38.png)
 
+![Logo](./img/Capture d’écran du 2025-11-15 18-58-38.png)
+
 ### 🔐 **Sécurité**
 - Authentification complète (login + setup)
 - Gestion multi-utilisateurs
