@@ -44,6 +44,8 @@ avec Dashboard Web, sauvegardes, restauration et supervision.
 ## 🔧 Matériel requis
 
 - Raspberry Pi (3, 4, Zero 2 W…)
+![Raspberry Pi Setup](img/rasb.jpg)
+
 - Module 4G SIM7600E (USB)
 - Carte SIM Free Mobile (APN : `free`)
 - Connexion Freebox
