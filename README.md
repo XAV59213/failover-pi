@@ -21,6 +21,7 @@ avec Dashboard Web, sauvegardes, restauration et supervision.
 - Backup & restore complet (.zip)
 - Gestion utilisateurs (Admin + Users limités)
 
+
 ### 🔐 **Sécurité**
 - Authentification complète (login + setup)
 - Gestion multi-utilisateurs
