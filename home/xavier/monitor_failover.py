@@ -1,182 +1,332 @@
 #!/usr/bin/env python3
-import subprocess
-import time
-import json
+# ============================================================================
+#  Failover-Pi : Surveillance Freebox <-> 4G SIM7600E
+#
+#  - Surveille l'accès Internet via la Freebox (LAN + ping 8.8.8.8 via Freebox)
+#  - Surveille l'accès Internet via la 4G (ping 8.8.8.8 via wwan0)
+#  - Lance /home/xavier/connect_4g.sh en cas de perte Freebox
+#  - Envoie des SMS via /home/xavier/send_sms.py
+#  - Gère les messages :
+#       ⚠️ La Freebox n’a plus d'accès à Internet.
+#       ✅ La connexion Internet Freebox est rétablie.
+#       📡 Connexion 4G établie (failover).
+#       📵 La connexion 4G (SIM7600E) est perdue.
+#       ❌ Aucune connexion disponible (ni Freebox, ni 4G).
+#       Le Raspberry Pi Failover vient de redemarrer.
+# ============================================================================
+
 import os
+import json
+import time
+import subprocess
 from datetime import datetime
 
-LOG_FILE = "/home/xavier/monitor.log"
+
 CONFIG_FILE = "/home/xavier/config.json"
-CONNECT_4G = "/home/xavier/connect_4g.sh"
+LOG_FILE = "/home/xavier/monitor.log"
 SMS_SCRIPT = "/home/xavier/send_sms.py"
-HISTORY_FILE = "/home/xavier/status_history.json"
-GATEWAY = "192.168.0.254"  # Freebox par défaut
+CONNECT_4G_SCRIPT = "/home/xavier/connect_4g.sh"
+
+# Intervalle entre deux checks (en secondes)
+CHECK_INTERVAL = 60
+
+# Délai minimal entre deux tentatives d'activation 4G (en secondes)
+MIN_4G_RETRY_DELAY = 90
 
 
-# ----------------------------------------------------------------------
-# Utilitaires
-# ----------------------------------------------------------------------
-def log(msg):
-    entry = f"[{datetime.now().strftime('%H:%M:%S')}] {msg}"
+# ----------------------------------------------------------------------------
+# Helpers log
+# ----------------------------------------------------------------------------
+def ts():
+    """Horodatage type [dd/mm/YYYY HH:MM:SS]."""
+    return datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+
+
+def log(msg: str):
+    """Écrit dans monitor.log + stdout."""
+    line = f"[{ts()}] {msg}"
+    print(line)
     try:
-        with open(LOG_FILE, "a") as f:
-            f.write(entry + "\n")
-    except:
+        with open(LOG_FILE, "a", encoding="utf-8") as f:
+            f.write(line + "\n")
+    except Exception:
         pass
-    return entry
 
 
-def is_reachable(ip: str) -> bool:
-    """Test si une IP répond au ping."""
+# ----------------------------------------------------------------------------
+# Config
+# ----------------------------------------------------------------------------
+def load_config(path: str):
+    cfg = {}
     try:
-        r = subprocess.run(
-            ["ping", "-c", "1", "-W", "1", ip],
+        with open(path, "r", encoding="utf-8") as f:
+            cfg = json.load(f)
+    except Exception:
+        pass
+    # Valeurs par défaut
+    cfg.setdefault("gateway", "192.168.0.254")
+    cfg.setdefault("apn", "free")
+    return cfg
+
+
+# ----------------------------------------------------------------------------
+# Commandes & ping
+# ----------------------------------------------------------------------------
+def run_cmd(cmd: str, timeout: int = 10):
+    """
+    Exécute une commande shell, retourne (rc, stdout, stderr)
+    """
+    try:
+        res = subprocess.run(
+            cmd,
+            shell=True,
             capture_output=True,
-            text=True
+            text=True,
+            timeout=timeout,
         )
-        return r.returncode == 0
-    except:
-        return False
+        return res.returncode, res.stdout.strip(), res.stderr.strip()
+    except subprocess.TimeoutExpired:
+        return 1, "", f"Timeout ({timeout}s)"
+    except Exception as e:
+        return 1, "", str(e)
 
 
-def is_4g_connected() -> bool:
-    """Vérifie si wwan0 a une adresse IP."""
-    try:
-        result = subprocess.run(["ip", "addr", "show", "wwan0"], capture_output=True, text=True)
-        return "inet " in result.stdout
-    except:
-        return False
-
-
-def update_history(state):
+def ping(host: str, iface: str | None = None, count: int = 1, timeout: int = 2) -> bool:
     """
-    state = 1 → Freebox OK
-    state = 0 → 4G ACTIVE
+    Ping simple, True si OK.
+    On ignore la sortie, seul le code retour compte.
     """
+    if iface:
+        cmd = f"ping -I {iface} -c {count} -W {timeout} {host}"
+    else:
+        cmd = f"ping -c {count} -W {timeout} {host}"
+
+    rc, _, _ = run_cmd(cmd, timeout=timeout + 1)
+    return rc == 0
+
+
+# ----------------------------------------------------------------------------
+# SMS
+# ----------------------------------------------------------------------------
+def send_sms(message: str):
+    """
+    Envoie un SMS via send_sms.py.
+    """
+    log(f"[SMS] Préparation envoi : {message}")
     try:
-        if not os.path.exists(HISTORY_FILE):
-            data = {"times": [], "states": []}
+        res = subprocess.run(
+            ["python3", SMS_SCRIPT, message],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        if res.returncode == 0:
+            log(f"[SMS] OK : {res.stdout.strip()}")
         else:
-            with open(HISTORY_FILE, "r") as f:
-                data = json.load(f)
-    except:
-        data = {"times": [], "states": []}
-
-    data["times"].append(datetime.now().strftime("%d/%m %H:%M"))
-    data["states"].append(state)
-
-    # On limite à 1000 points pour éviter le gonflement
-    data["times"] = data["times"][-1000:]
-    data["states"] = data["states"][-1000:]
-
-    try:
-        with open(HISTORY_FILE, "w") as f:
-            json.dump(data, f)
-    except:
-        pass
+            log(
+                f"[SMS] ERREUR (code={res.returncode}) : {res.stdout.strip()}\n{res.stderr.strip()}"
+            )
+    except subprocess.TimeoutExpired:
+        log("[SMS] ERREUR : Timeout lors de l'envoi du SMS.")
+    except Exception as e:
+        log(f"[SMS] Exception lors de l'envoi du SMS : {e}")
 
 
-# ----------------------------------------------------------------------
-# Actions failover
-# ----------------------------------------------------------------------
-def switch_to_4g():
-    """Active la connexion 4G et redirige la route par wwan0."""
+# ----------------------------------------------------------------------------
+# État des connexions
+# ----------------------------------------------------------------------------
+def check_status(gateway: str):
+    """
+    Vérifie :
+      - Freebox LAN (ping gateway via eth0)
+      - Freebox Internet (ping 8.8.8.8 via eth0 si LAN OK)
+      - 4G Internet (ping 8.8.8.8 via wwan0)
+    Retourne (freebox_lan_ok, freebox_inet_ok, fourg_inet_ok)
+    """
+    # Freebox LAN
+    freebox_lan_ok = ping(gateway, iface="eth0", count=1, timeout=1)
 
-    if not is_4g_connected():
-        log("Connexion 4G…")
-        subprocess.run(["sudo", CONNECT_4G])
+    # Freebox Internet
+    if freebox_lan_ok:
+        freebox_inet_ok = ping("8.8.8.8", iface="eth0", count=2, timeout=2)
+    else:
+        freebox_inet_ok = False
 
-    log("Bascule sur 4G")
+    # 4G Internet
+    fourg_inet_ok = ping("8.8.8.8", iface="wwan0", count=2, timeout=2)
 
-    # Supprimer la route Freebox
-    subprocess.run(
-        ["ip", "route", "del", "default", "via", GATEWAY, "dev", "eth0"],
-        stderr=subprocess.DEVNULL
+    return freebox_lan_ok, freebox_inet_ok, fourg_inet_ok
+
+
+# ----------------------------------------------------------------------------
+# Gestion des routes / interfaces
+# ----------------------------------------------------------------------------
+def set_freebox_primary(gateway: str):
+    """
+    Rebasculer la route principale sur la Freebox (eth0),
+    remonter le Wi-Fi si besoin, supprimer default wwan0.
+    """
+    # Remonte le Wi-Fi (au cas où on l'a down pendant le failover)
+    rc, out, err = run_cmd("sudo ip link set wlan0 up", timeout=5)
+    log(f"[NET] ip link set wlan0 up (rc={rc}) {err}")
+
+    # Route par défaut : Freebox
+    rc, out, err = run_cmd(
+        f"sudo ip route replace default via {gateway} dev eth0 metric 100", timeout=5
     )
+    log(f"[NET] ip route replace default via {gateway} dev eth0 metric 100 (rc={rc}) {err}")
 
-    # Trouver gateway 4G
-    route = subprocess.run(
-        ["ip", "route", "show", "dev", "wwan0"],
-        capture_output=True,
-        text=True
-    ).stdout
+    # Supprimer default via wwan0
+    rc, out, err = run_cmd("sudo ip route del default dev wwan0", timeout=5)
+    if rc != 0 and "No such process" not in err and "Cannot find device" not in err:
+        log(f"[NET] ip route del default dev wwan0 (rc={rc}) {err}")
 
-    if "default" not in route:
-        log("ERREUR : Aucune route 4G trouvée")
-        return
 
-    gw_4g = route.split("via")[1].split()[0]
+def prepare_failover_4g():
+    """
+    Actions réseau lors de l'activation du failover 4G :
+      - couper wlan0 (éviter routes par défaut parasites)
+      - laisser connect_4g.sh gérer la route default wwan0.
+    """
+    rc, out, err = run_cmd("sudo ip link set wlan0 down", timeout=5)
+    log(f"[NET] ip link set wlan0 down (rc={rc}) {err}")
 
-    # Ajouter la route par wwan0
-    subprocess.run(["ip", "route", "add", "default", "via", gw_4g, "dev", "wwan0"])
 
-    # SMS notification
+# ----------------------------------------------------------------------------
+# Lancement du script 4G
+# ----------------------------------------------------------------------------
+def try_start_4g():
+    """
+    Lance /home/xavier/connect_4g.sh et retourne True si rc == 0.
+    """
+    log("[4G] Lancement du script de connexion 4G...")
     try:
-        subprocess.run(["python3", SMS_SCRIPT, "Failover : Bascule sur 4G !"])
-    except:
-        log("ERREUR SMS failover")
-
-    update_history(0)
-
-
-def switch_to_freebox():
-    """Rebascule sur Freebox quand elle revient."""
-    log("Retour sur Freebox")
-
-    # Supprime la route wwan0 si présente
-    subprocess.run(
-        ["ip", "route", "del", "default", "dev", "wwan0"],
-        stderr=subprocess.DEVNULL
-    )
-
-    # Remet route Freebox
-    subprocess.run(["ip", "route", "add", "default", "via", GATEWAY, "dev", "eth0"])
-
-    try:
-        subprocess.run(["python3", SMS_SCRIPT, "Failback : Retour Freebox OK"])
-    except:
-        log("ERREUR SMS failback")
-
-    update_history(1)
+        res = subprocess.run(
+            ["sudo", CONNECT_4G_SCRIPT],
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+        if res.returncode == 0:
+            log("[4G] Connexion 4G active (ping OK).")
+            log(f"[4G] Script connect_4g.sh terminé (rc={res.returncode}).")
+            return True
+        else:
+            log("[4G] ERREUR : échec du démarrage réseau 4G")
+            log(f"[4G] Résultat connect_4g.sh (rc={res.returncode}) :\n{res.stdout}\n{res.stderr}")
+            return False
+    except subprocess.TimeoutExpired:
+        log("[4G] ERREUR : Timeout lors du script connect_4g.sh")
+        return False
+    except Exception as e:
+        log(f"[4G] Exception lors du script connect_4g.sh : {e}")
+        return False
 
 
-# ----------------------------------------------------------------------
-# Boucle principale (Watchdog)
-# ----------------------------------------------------------------------
-def load_gateway():
-    """Lit la gateway dans config.json."""
-    try:
-        with open(CONFIG_FILE, "r") as f:
-            data = json.load(f)
-            return data.get("gateway", "192.168.0.254")
-    except:
-        return "192.168.0.254"
-
-
+# ----------------------------------------------------------------------------
+# Boucle principale
+# ----------------------------------------------------------------------------
 def main():
-    global GATEWAY
-    GATEWAY = load_gateway()
-    log("=== MONITOR FAILOVER DÉMARRÉ ===")
-    update_history(1 if is_reachable(GATEWAY) else 0)
+    cfg = load_config(CONFIG_FILE)
+    gateway = cfg.get("gateway", "192.168.0.254")
 
-    last_state = None
+    log("=== MONITOR FAILOVER DÉMARRÉ ===")
+
+    # SMS au démarrage du monitor (Raspberry reboot / service relancé)
+    send_sms("Le Raspberry Pi Failover vient de redemarrer.")
+
+    prev_freebox_inet = None
+    prev_any_conn = None
+    prev_4g_inet = None
+
+    last_4g_attempt = 0.0
 
     while True:
-        time.sleep(5)
+        freebox_lan_ok, freebox_inet_ok, fourg_inet_ok = check_status(gateway)
 
-        GATEWAY = load_gateway()  # recharger automatiquement
-        freebox_ok = is_reachable(GATEWAY)
+        # Status global
+        status_line = (
+            f"[STATUS] Freebox LAN={'OK' if freebox_lan_ok else 'KO'} "
+            f"Internet={'OK' if freebox_inet_ok else 'KO'} / "
+            f"4G={'OK' if fourg_inet_ok else 'KO'}"
+        )
+        log(status_line)
 
-        if freebox_ok:
-            if last_state == 0:  # avant : 4G
-                switch_to_freebox()
-            last_state = 1
-            continue
+        any_conn = freebox_inet_ok or fourg_inet_ok
 
-        # Freebox KO
-        if last_state != 0:
-            switch_to_4g()
-        last_state = 0
+        # --------------------------------------------------------------------
+        # Gestion des transitions Freebox Internet
+        # --------------------------------------------------------------------
+        if prev_freebox_inet is None:
+            prev_freebox_inet = freebox_inet_ok
+        else:
+            if prev_freebox_inet and not freebox_inet_ok:
+                # Perte Internet Freebox
+                log("Perte de connexion Internet Freebox")
+                send_sms("⚠️ La Freebox n’a plus d'accès à Internet.")
+
+            elif not prev_freebox_inet and freebox_inet_ok:
+                # Retour Internet Freebox
+                log("Connexion Internet Freebox rétablie")
+                send_sms("✅ La connexion Internet Freebox est rétablie.")
+                # Rebasculer la route sur la Freebox
+                set_freebox_primary(gateway)
+
+            prev_freebox_inet = freebox_inet_ok
+
+        # --------------------------------------------------------------------
+        # Gestion des transitions 4G
+        # --------------------------------------------------------------------
+        if prev_4g_inet is None:
+            prev_4g_inet = fourg_inet_ok
+        else:
+            if not prev_4g_inet and fourg_inet_ok and not freebox_inet_ok:
+                # 4G vient de devenir OK alors que Freebox KO -> failover
+                log("Failover 4G actif (bascule sur 4G)")
+                prepare_failover_4g()
+                send_sms("📡 Connexion 4G établie (failover).")
+
+            elif prev_4g_inet and not fourg_inet_ok:
+                # 4G vient de tomber
+                log("Connexion 4G (wwan0) perdue")
+                send_sms("📵 La connexion 4G (SIM7600E) est perdue.")
+
+            prev_4g_inet = fourg_inet_ok
+
+        # --------------------------------------------------------------------
+        # Gestion "aucune connexion"
+        # --------------------------------------------------------------------
+        if prev_any_conn is None:
+            prev_any_conn = any_conn
+        else:
+            if prev_any_conn and not any_conn:
+                # On vient de passer d'un état "quelque chose fonctionne" à "plus rien"
+                log("Aucune connexion disponible (Freebox + 4G KO)")
+                send_sms("❌ Aucune connexion disponible (ni Freebox, ni 4G).")
+            prev_any_conn = any_conn
+
+        # --------------------------------------------------------------------
+        # Tentative d'activation 4G si Freebox HS et 4G HS
+        # --------------------------------------------------------------------
+        if not freebox_inet_ok and not fourg_inet_ok:
+            now = time.time()
+            if now - last_4g_attempt >= MIN_4G_RETRY_DELAY:
+                log("[4G] Tentative d'activation de la connexion 4G (Freebox KO, 4G KO).")
+                last_4g_attempt = now
+                # Lance le script 4G
+                ok_4g = try_start_4g()
+                if not ok_4g:
+                    log("[4G] Nouvelle tentative échouée, on réessaiera plus tard.")
+            else:
+                remaining = int(MIN_4G_RETRY_DELAY - (now - last_4g_attempt))
+                log(
+                    f"[4G] Dernier essai trop récent, on attend encore {remaining}s avant de relancer."
+                )
+
+        # --------------------------------------------------------------------
+        # Pause avant le prochain cycle
+        # --------------------------------------------------------------------
+        time.sleep(CHECK_INTERVAL)
 
 
 if __name__ == "__main__":
