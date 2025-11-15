@@ -2,11 +2,75 @@
 {% block content %}
 <h2>📡 État du système</h2>
 
-<div class="card">
-    <p><b>Route actuelle :</b> {{ gw_text }}</p>
-    <p><b>Signal SIM7600 :</b> {{ signal_text }} ({{ signal_percent }}%)</p>
+{# Infos utilisateur pour savoir si admin ou non #}
+{% set user = session.get("user") %}
+{% set role = user["role"] if user else "" %}
+{% set is_admin = (role == "admin") %}
+
+<!-- Carte : état de la route (Freebox / 4G) -->
+<div class="card status-card">
+    {% set state = 'unknown' %}
+    {% if 'Freebox' in gw_text %}
+        {% set state = 'freebox' %}
+    {% elif '4G' in gw_text %}
+        {% set state = '4g' %}
+    {% endif %}
+
+    <div class="status-row">
+        <div class="led led-{{ state }}"></div>
+        <div>
+            <div class="status-main">{{ gw_text }}</div>
+            <div class="status-sub">Route par défaut actuelle</div>
+        </div>
+    </div>
 </div>
 
+<!-- Carte : signal 4G -->
+<div class="card">
+    <h3>Signal 4G (SIM7600E)</h3>
+    <div class="signal-wrapper">
+        <div class="signal-bar">
+            <div class="signal-fill" style="width: {{ signal_percent }}%;"></div>
+        </div>
+        <div class="signal-text">{{ signal_text }} — {{ signal_percent }}%</div>
+    </div>
+</div>
+
+<!-- Carte : actions réseau -->
+<div class="card">
+    <h3>Actions réseau</h3>
+    <div class="btn-row">
+        <a class="btn btn-primary" href="{{ url_for('sms') }}">📨 Test SMS</a>
+        <a class="btn btn-warning" href="{{ url_for('reboot') }}">📡 Reboot modem 4G</a>
+        <a class="btn btn-secondary" href="{{ url_for('test_failover') }}">🧪 Test failover</a>
+    </div>
+</div>
+
+<!-- Carte : actions système -->
+<div class="card">
+    <h3>Actions système</h3>
+    <div class="btn-row">
+        <a class="btn btn-danger {% if not is_admin %}btn-disabled{% endif %}"
+           href="{% if is_admin %}{{ url_for('reboot_pi') }}{% else %}#{% endif %}">
+           🔁 Reboot Raspberry Pi
+        </a>
+    </div>
+    {% if not is_admin %}
+        <p style="font-size:0.8em;color:var(--muted);margin-top:6px;">
+            (Reboot Pi réservé aux administrateurs)
+        </p>
+    {% endif %}
+</div>
+
+<!-- Carte : historique Freebox / 4G -->
+<div class="card">
+    <h3>Historique Freebox / 4G</h3>
+    <div class="chart-container">
+        <canvas id="historyChart"></canvas>
+    </div>
+</div>
+
+<!-- Carte : logs avec scroll, copy, toggle -->
 <div class="card">
     <h3>Derniers logs</h3>
 
@@ -15,11 +79,48 @@
         <button class="btn btn-secondary" onclick="copyLogs()">📋 Copier tout</button>
     </div>
 
-    <pre id="logbox">{{ logs | join("\n") }}</pre>
+    <pre id="logbox" class="log-box">{{ logs | join("\n") }}</pre>
 </div>
 
-<div class="card">
-    <h3>Actions</h3>
-    <a class="btn" href="/reboot_pi">🔄 Redémarrer le Raspberry</a>
-</div>
+<!-- Chart.js pour l’historique -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    // Données envoyées par routes.py (history_times / history_states)
+    const times  = {{ history_times | tojson | safe }};
+    const states = {{ history_states | tojson | safe }};
+
+    if (times.length && states.length) {
+        const ctx = document.getElementById("historyChart").getContext("2d");
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: times,
+                datasets: [{
+                    label: 'État réseau (1 = Freebox, 0 = 4G)',
+                    data: states,
+                    fill: true,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 1,
+                        ticks: {
+                            stepSize: 1,
+                            callback: (value) => value === 1 ? 'Freebox' : (value === 0 ? '4G' : value)
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

@@ -2,15 +2,18 @@
 {% block content %}
 <h2>🔍 Diagnostics système</h2>
 
+<!-- Grille 3 colonnes responsive -->
 <div class="grid">
     {% for c in checks %}
     <div class="card">
         <b>{{ c.name }}</b><br>
+
         {% if c.ok %}
-            <span style="color:lightgreen">OK</span>
+            <span style="color:lightgreen">✔️ OK</span>
         {% else %}
-            <span style="color:red">KO</span>
+            <span style="color:red">❌ KO</span>
         {% endif %}
+
         <br>
         <small>{{ c.detail }}</small>
     </div>

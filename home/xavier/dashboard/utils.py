@@ -1,384 +1,480 @@
-import subprocess
 import os
 import json
-from datetime import datetime
+import subprocess
+import datetime
 import shutil
-import stat
+from typing import List, Tuple
 
 
-# ============================================================================
-# HELPERS GÉNÉRIQUES
-# ============================================================================
-
-def run(cmd: str) -> str:
-    """
-    Exécute une commande shell et renvoie stdout ou 'N/A' en cas d'erreur.
-    """
-    try:
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=6)
-        if result.returncode == 0:
-            return result.stdout.strip()
-        return "N/A"
-    except Exception:
-        return "N/A"
-
-
+# ----------------------------------------------------------------------
+#  LOG & CONFIG
+# ----------------------------------------------------------------------
 def log(msg: str, log_file: str) -> str:
-    """
-    Ajoute une ligne au fichier de log et renvoie l'entrée écrite.
-    """
-    entry = f"[{datetime.now().strftime('%H:%M:%S')}] {msg}"
+    """Écrit un log horodaté dans log_file et le renvoie."""
+    ts = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    line = f"[{ts}] {msg}"
     try:
-        with open(log_file, "a") as f:
-            f.write(entry + "\n")
+        with open(log_file, "a", encoding="utf-8") as f:
+            f.write(line + "\n")
+    except Exception:
+        # On évite les crashs si le log ne peut pas s'écrire
+        pass
+    print(line)
+    return line
+
+
+def load_config(path: str) -> dict:
+    """Charge config.json (ou renvoie des valeurs par défaut)."""
+    default_cfg = {
+        "apn": "free",
+        "sim_pin": "1234",
+        "sms_phone": "+33600000000",
+        "gateway": "192.168.0.254",
+        "serial_port": "/dev/ttyUSB3",
+        "port": 5123,
+        "qmi_device": "/dev/cdc-wdm0",
+        "wwan_interface": "wwan0",
+    }
+    try:
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            default_cfg.update(data or {})
     except Exception:
         pass
-    return entry
+    return default_cfg
 
 
-# ============================================================================
-# CONFIG
-# ============================================================================
-
-def load_config(config_file: str):
-    """
-    Charge config.json en appliquant des valeurs par défaut.
-    """
-    default = {
-        "apn": "free",
-        "sim_pin": "",
-        "sms_phone": "+33XXXXXXXXX",    # numéro principal (compat)
-        "sms_recipients": [],           # liste de numéros à notifier
-        "gateway": "192.168.0.254",
-        "port": 5123,
-        "serial_port": "/dev/ttyUSB3",
-    }
-    if os.path.exists(config_file):
-        try:
-            with open(config_file, "r") as f:
-                data = json.load(f)
-            default.update(data)
-            return default
-        except Exception:
-            pass
-    return default
-
-
-def save_config(data, config_file: str):
-    """
-    Écrit config.json de manière atomique pour éviter la corruption.
-    """
+def save_config(cfg: dict, path: str) -> bool:
+    """Sauvegarde config.json, renvoie True si OK."""
     try:
-        tmp = config_file + ".tmp"
-        with open(tmp, "w") as f:
-            json.dump(data, f, indent=2)
-        os.replace(tmp, config_file)
+        tmp = path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, indent=2, ensure_ascii=False)
+        os.replace(tmp, path)
         return True
     except Exception:
         return False
 
 
-# ============================================================================
-# ÉTAT RÉSEAU / SIGNAL
-# ============================================================================
-
-def get_gateway(config_file: str):
-    """
-    Détermine la route par défaut :
-      - 'Freebox OK' si la route default passe par la gateway (eth0)
-      - '4G ACTIVE' si la route default passe par wwan0
-      - 'Inconnu' sinon
-    Retourne (texte, couleur_led).
-    """
-    config = load_config(config_file)
-    gateway_ip = config.get("gateway", "192.168.0.254")
-
-    route = run("ip route show default")
-    if route == "N/A":
-        return "Inconnu", "gray"
-
-    if gateway_ip in route and "eth0" in route:
-        return "Freebox OK", "green"
-    elif "wwan0" in route:
-        return "4G ACTIVE", "red"
-    return "Inconnu", "gray"
-
-
-def get_signal():
-    """
-    Récupère la force du signal SIM7600E via qmicli.
-    Retourne (texte_rssi, pourcentage, couleur).
-    """
-    raw = run("qmicli -d /dev/cdc-wdm0 --nas-get-signal-strength 2>/dev/null | grep rssi")
-    if not raw or raw == "N/A":
-        return "Non connecté", 0, "gray"
-
+# ----------------------------------------------------------------------
+#  COMMANDES SHELL
+# ----------------------------------------------------------------------
+def _run_cmd(cmd, timeout=10) -> Tuple[int, str, str]:
+    """Exécute une commande shell et renvoie (rc, stdout, stderr)."""
     try:
-        # Exemple de ligne : "RSSI: '-75 dBm' ..."
-        rssi = float(raw.split("'")[1].split()[0])  # -75
-        # Mapping simple -110 dBm → 0%, -70 dBm → 100%
-        percent = max(0, min(100, int((rssi + 110) * 2.5)))
-        color = "green" if rssi > -70 else ("orange" if rssi > -90 else "red")
-        return f"{rssi} dBm", percent, color
-    except Exception:
-        return "Erreur", 0, "gray"
+        proc = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+        return proc.returncode, proc.stdout.strip(), proc.stderr.strip()
+    except Exception as e:
+        return 1, "", str(e)
 
 
-# ============================================================================
-# LOGS / BACKUPS / HISTORIQUE
-# ============================================================================
-
-def get_logs(log_file: str):
-    """
-    Retourne les 8 dernières lignes de log (ou un message).
-    """
+# ----------------------------------------------------------------------
+#  LECTURE LOGS & HISTORIQUE
+# ----------------------------------------------------------------------
+def get_logs(log_file: str, limit: int = 80) -> List[str]:
+    """Retourne les dernières lignes du fichier de log."""
     if not os.path.exists(log_file):
-        return ["Aucun log"]
+        return []
     try:
-        with open(log_file) as f:
+        with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
             lines = f.readlines()
-        return [l.strip() for l in lines[-8:] if l.strip()]
-    except Exception:
-        return ["Erreur lecture logs"]
-
-
-def list_backups(backup_dir: str):
-    """
-    Liste les 10 derniers fichiers .zip du répertoire de backup.
-    """
-    try:
-        files = [f for f in os.listdir(backup_dir) if f.endswith(".zip")]
-        return sorted(files, reverse=True)[:10]
+        return [l.rstrip("\n") for l in lines[-limit:]]
     except Exception:
         return []
 
 
-def get_freebox_history(log_file: str):
+def get_freebox_history(log_file: str) -> Tuple[List[str], List[int]]:
     """
-    Renvoie l'historique Freebox / 4G pour l'affichage du graphique.
-
-    Priorité :
-      1. Lecture de /home/xavier/status_history.json (format structuré)
-         {
-           "times": ["01/01 10:00", ...],
-           "states": [1, 0, 1, ...]  # 1=Freebox, 0=4G
-         }
-      2. Sinon : fallback sur le fichier de log (recherche 'Freebox OK' / '4G ACTIVE').
+    Lit un fichier d'historique structuré (status_history.json) si présent,
+    sinon tente de dériver de monitor.log.
+    Retourne (times, states) avec state=1 pour Freebox, 0 pour 4G.
     """
-    history_file = "/home/xavier/status_history.json"
+    hist_file = "/home/xavier/status_history.json"
+    times: List[str] = []
+    states: List[int] = []
 
-    # --- 1) Fichier structuré (recommandé) ---
-    if os.path.exists(history_file):
+    # Priorité au fichier JSON structuré
+    if os.path.exists(hist_file):
         try:
-            with open(history_file, "r") as f:
+            with open(hist_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
             times = data.get("times", [])
             states = data.get("states", [])
-
-            # On tronque au cas où ça gonfle (sécurité)
-            if len(times) > 2000:
-                times = times[-2000:]
-            if len(states) > 2000:
-                states = states[-2000:]
-
-            # Alignement tailles
-            n = min(len(times), len(states))
-            return times[-n:], states[-n:]
+            if isinstance(times, list) and isinstance(states, list):
+                return times[-200:], states[-200:]
         except Exception:
-            # En cas de problème, on tombera sur le fallback log
             pass
 
-    # --- 2) Fallback : parsing du fichier de log ---
+    # Fallback simplifié: on parse les lignes du log
     if not os.path.exists(log_file):
         return [], []
 
-    times, states = [], []
     try:
-        with open(log_file) as f:
-            lines = f.readlines()
-
-        # On ne garde que les dernières lignes pertinentes
-        for line in lines[-500:]:
-            if "Freebox OK" in line or "4G ACTIVE" in line:
-                try:
-                    time_part = line.split("]")[0].replace("[", "").strip()
-                except Exception:
-                    continue
-
-                state = 1 if "Freebox OK" in line else 0
-                times.append(time_part)
-                states.append(state)
-
-        return times, states
+        with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
+            for line in f:
+                line = line.strip()
+                if "] [STATUS]" in line and "Freebox" in line:
+                    # Exemple:
+                    # [15/11/2025 09:52:06] [STATUS] Freebox LAN=KO Internet=KO / 4G=KO
+                    try:
+                        ts_part = line.split("]", 1)[0].lstrip("[")
+                        status_part = line.split("] [STATUS]", 1)[1]
+                        # On considère que si "Internet=OK" → état Freebox=1 sinon 0
+                        state = 1 if "Internet=OK" in status_part else 0
+                        times.append(ts_part)
+                        states.append(state)
+                    except Exception:
+                        continue
+        return times[-200:], states[-200:]
     except Exception:
         return [], []
 
 
-# ============================================================================
-# DIAGNOSTICS / PERMISSIONS
-# ============================================================================
+# ----------------------------------------------------------------------
+#  BACKUPS
+# ----------------------------------------------------------------------
+def list_backups(backup_dir: str) -> List[str]:
+    """Liste les backups ZIP dans le dossier backup_dir, triés par date descendante."""
+    if not os.path.isdir(backup_dir):
+        return []
+    files = []
+    for f in os.listdir(backup_dir):
+        if f.lower().endswith(".zip"):
+            full = os.path.join(backup_dir, f)
+            files.append((f, os.path.getmtime(full)))
+    files.sort(key=lambda x: x[1], reverse=True)
+    return [f for f, _ in files]
 
-def which_cmd(cmd: str):
-    return shutil.which(cmd)
+
+# ----------------------------------------------------------------------
+#  STATUT GATEWAY & SIGNAL 4G (pour le dashboard)
+# ----------------------------------------------------------------------
+def _ping_host(host: str, count: int = 2, timeout: int = 2) -> bool:
+    rc, out, err = _run_cmd(
+        ["ping", "-c", str(count), "-W", str(timeout), host],
+        timeout=timeout * count + 2,
+    )
+    return rc == 0
 
 
-def is_writable(path: str) -> bool:
+def get_gateway(config_file: str) -> Tuple[str, str]:
     """
-    Vérifie si un chemin est inscriptible (fichier ou répertoire).
+    Retourne (texte_statut, couleur_led) pour le dashboard.
+    On ping la gateway Freebox et 8.8.8.8 via la route par défaut.
     """
+    cfg = load_config(config_file)
+    gw = cfg.get("gateway", "192.168.0.254")
+
+    lan_ok = _ping_host(gw, count=1, timeout=1)
+    internet_ok = _ping_host("8.8.8.8", count=1, timeout=1)
+
+    if lan_ok and internet_ok:
+        return "Freebox OK (Internet OK)", "#3fb950"
+    if lan_ok and not internet_ok:
+        return "Freebox OK (pas d'accès Internet)", "#f0883e"
+    if not lan_ok:
+        # On pourrait raffiner en testant wwan0, ici on simplifie :
+        return "Connexion 4G ou aucune (Freebox KO)", "#f85149"
+
+    return "État réseau inconnu", "#8b949e"
+
+
+def get_signal() -> Tuple[str, int, int]:
+    """
+    Retourne (description_signal, pourcentage, rssi_dbm) pour le SIM7600E.
+    Utilise qmicli --nas-get-signal-strength.
+    """
+    rc, out, err = _run_cmd(
+        ["sudo", "qmicli", "-d", "/dev/cdc-wdm0", "--nas-get-signal-strength"],
+        timeout=8,
+    )
+    if rc != 0:
+        return ("Non connecté", 0, 0)
+
+    # On cherche 'Network 'xxx': '-72 dBm''
+    rssi_dbm = 0
+    for line in out.splitlines():
+        line = line.strip()
+        if "Network" in line and "dBm" in line and ":" in line:
+            # ex: Network 'lte': '-72 dBm'
+            try:
+                part = line.split(":")[-1].strip()
+                val = part.split()[0].strip().replace("'", "")
+                rssi_dbm = int(val)
+                break
+            except Exception:
+                continue
+
+    if rssi_dbm == 0:
+        return ("Non connecté", 0, 0)
+
+    # Conversion grossière dBm → %
+    # -110 dBm = 0 %, -50 dBm = 100 %
+    percent = int((rssi_dbm + 110) * 100 / 60)
+    if percent < 0:
+        percent = 0
+    if percent > 100:
+        percent = 100
+
+    desc = f"{rssi_dbm} dBm ({percent}%)"
+    return (desc, percent, rssi_dbm)
+
+
+# ----------------------------------------------------------------------
+#  DIAGNOSTICS (pour /diagnostics)
+# ----------------------------------------------------------------------
+def _check_python_module(name: str) -> dict:
     try:
-        if os.path.isdir(path):
-            testfile = os.path.join(path, ".testwrite")
-            with open(testfile, "w") as f:
-                f.write("ok")
-            os.remove(testfile)
-            return True
-        else:
-            if not os.path.exists(path):
-                with open(path, "w") as f:
-                    f.write("")
-                os.remove(path)
-                return True
-            with open(path, "a"):
-                pass
-            return True
-    except Exception:
-        return False
+        __import__(name)
+        return {"name": f"Module Python: {name}", "ok": True, "detail": "OK"}
+    except Exception as e:
+        return {"name": f"Module Python: {name}", "ok": False, "detail": str(e)}
 
 
-def is_executable(path: str) -> bool:
-    """
-    Vérifie le bit exécutable (utilisateur) sur un fichier.
-    """
+def _check_binary(name: str) -> dict:
+    rc, out, err = _run_cmd(["which", name], timeout=3)
+    if rc == 0 and out:
+        return {"name": f"Binaire: {name}", "ok": True, "detail": out}
+    return {"name": f"Binaire: {name}", "ok": False, "detail": err or "Introuvable"}
+
+
+def _check_dir_writable(path: str, label: str) -> dict:
+    if not os.path.isdir(path):
+        return {"name": f"Dossier {label}", "ok": False, "detail": path}
+    test_file = os.path.join(path, ".test_write")
     try:
-        st = os.stat(path)
-        return bool(st.st_mode & stat.S_IXUSR)
-    except Exception:
-        return False
+        with open(test_file, "w") as f:
+            f.write("ok")
+        os.remove(test_file)
+        return {"name": f"{label} inscriptible", "ok": True, "detail": path}
+    except Exception as e:
+        return {"name": f"{label} inscriptible", "ok": False, "detail": f"{path} ({e})"}
 
 
-def check_dependencies(app_config: dict):
+def _check_file_exists(path: str, label: str) -> dict:
+    if os.path.exists(path):
+        return {"name": f"Présence: {label}", "ok": True, "detail": path}
+    return {"name": f"Présence: {label}", "ok": False, "detail": f"{path} introuvable"}
+
+
+def _check_executable(path: str, label: str) -> dict:
+    if os.path.exists(path) and os.access(path, os.X_OK):
+        return {"name": f"Executable: {label}", "ok": True, "detail": path}
+    return {"name": f"Executable: {label}", "ok": False, "detail": f"{path} non exécutable ou introuvable"}
+
+
+def _check_device(path: str, label: str) -> dict:
+    if os.path.exists(path):
+        return {"name": f"Périphérique {path}", "ok": True, "detail": path}
+    return {"name": f"Périphérique {path}", "ok": False, "detail": "Introuvable"}
+
+
+def _check_iface(name: str) -> dict:
+    rc, out, err = _run_cmd(["ip", "a", "show", name], timeout=5)
+    if rc == 0:
+        return {"name": f"Interface {name}", "ok": True, "detail": out}
+    return {"name": f"Interface {name}", "ok": False, "detail": err or "Introuvable"}
+
+
+def _check_service(name: str) -> dict:
+    rc, out, err = _run_cmd(["systemctl", "is-active", name], timeout=5)
+    if rc == 0 and out.strip() == "active":
+        return {"name": f"Service {name}", "ok": True, "detail": "active"}
+    return {"name": f"Service {name}", "ok": False, "detail": out or err or "inactif"}
+
+
+def _check_lsusb_sim7600() -> dict:
+    rc, out, err = _run_cmd(["lsusb"], timeout=5)
+    if rc == 0 and ("SimTech" in out or "1e0e:9001" in out or "Qualcomm" in out):
+        return {"name": "Module SIM7600E (lsusb)", "ok": True, "detail": out}
+    return {"name": "Module SIM7600E (lsusb)", "ok": False, "detail": err or out or "Non détecté"}
+
+
+def _check_ttyusb_ports() -> dict:
+    # On liste /dev/ttyUSB*
+    ports = [p for p in os.listdir("/dev") if p.startswith("ttyUSB")]
+    if ports:
+        detail = " ".join(f"/dev/{p}" for p in ports)
+        return {"name": "Port série (ttyUSB*)", "ok": True, "detail": detail}
+    return {"name": "Port série (ttyUSB*)", "ok": False, "detail": "Aucun /dev/ttyUSB* détecté"}
+
+
+def check_sim_card() -> dict:
     """
-    Réalise un diagnostic complet utilisé sur /diagnostics.
-    Retourne une liste de dicts {name, ok, detail}.
+    Vérifie la présence de la carte SIM via qmicli --uim-get-card-status.
+    'Card state: 'present'' → OK
     """
-    checks = []
+    rc, out, err = _run_cmd(
+        ["sudo", "qmicli", "-d", "/dev/cdc-wdm0", "--uim-get-card-status"],
+        timeout=10,
+    )
 
-    def add(name, ok, detail=""):
-        checks.append({"name": name, "ok": bool(ok), "detail": detail})
+    if rc != 0:
+        return {"name": "SIM : Détection carte", "ok": False, "detail": f"Erreur qmicli ({rc})"}
 
-    # --- Modules Python ---
-    modules = [
-        ("flask", "from flask import Flask"),
-        ("json", "import json"),
-        ("subprocess", "import subprocess"),
-        ("zipfile", "import zipfile"),
-        ("hashlib", "import hashlib"),
-        ("secrets", "import secrets"),
-        ("base64", "import base64"),
-    ]
-    for mod_name, code in modules:
+    if "Card state: 'present'" in out:
+        return {"name": "SIM : Détection carte", "ok": True, "detail": "Carte SIM détectée"}
+    if "Card state: 'absent'" in out:
+        return {"name": "SIM : Détection carte", "ok": False, "detail": "Aucune carte détectée"}
+
+    return {"name": "SIM : Détection carte", "ok": False, "detail": "État carte inconnu"}
+
+
+def check_sim_pin() -> dict:
+    """
+    Lit l'état du PIN via qmicli --uim-get-card-status.
+    PIN1 state: 'enabled-verified' → OK (PIN validé / READY).
+    """
+    rc, out, err = _run_cmd(
+        ["sudo", "qmicli", "-d", "/dev/cdc-wdm0", "--uim-get-card-status"],
+        timeout=10,
+    )
+
+    if rc != 0:
+        return {"name": "SIM : PIN (info)", "ok": False, "detail": f"Erreur qmicli ({rc})"}
+
+    if "PIN1 state: 'enabled-verified'" in out:
+        return {"name": "SIM : PIN (info)", "ok": True, "detail": "PIN vérifié (READY)"}
+    if "PIN1 state: 'enabled-not-verified'" in out:
+        return {"name": "SIM : PIN (info)", "ok": False, "detail": "PIN demandé (non saisi)"}
+    if "PIN1 state: 'disabled'" in out:
+        return {"name": "SIM : PIN (info)", "ok": True, "detail": "PIN désactivé"}
+
+    return {"name": "SIM : PIN (info)", "ok": False, "detail": "État PIN inconnu"}
+
+
+def check_modem_registration() -> dict:
+    """
+    Vérifie l'enregistrement réseau via qmicli --nas-get-serving-system.
+    """
+    rc, out, err = _run_cmd(
+        ["sudo", "qmicli", "-d", "/dev/cdc-wdm0", "--nas-get-serving-system"],
+        timeout=10,
+    )
+
+    if rc != 0:
+        return {"name": "Modem : Enregistrement réseau", "ok": False, "detail": "N/A"}
+
+    if "Registration state: 'registered'" in out:
+        # On peut ajouter l'opérateur
+        desc = "Enregistré"
+        for line in out.splitlines():
+            if "Description:" in line:
+                desc = line.strip()
+                break
+        return {"name": "Modem : Enregistrement réseau", "ok": True, "detail": desc}
+
+    return {"name": "Modem : Enregistrement réseau", "ok": False, "detail": "Non enregistré"}
+
+
+def check_modem_signal() -> dict:
+    """Diagnostic pour le signal SIM7600E."""
+    desc, percent, rssi = get_signal()
+    ok = percent > 0
+    return {
+        "name": "Signal SIM7600E",
+        "ok": ok,
+        "detail": desc,
+    }
+
+
+def check_wwan_active(wwan: str = "wwan0") -> dict:
+    """
+    Vérifie l'état de l'interface wwan0 (UP/DOWN).
+    """
+    rc, out, err = _run_cmd(["ip", "a", "show", wwan], timeout=5)
+    if rc != 0:
+        return {"name": "Modem : Interface wwan0 active", "ok": False, "detail": err or "Introuvable"}
+
+    up = "UP" in out and "LOWER_UP" in out
+    detail = out
+    return {
+        "name": "Modem : Interface wwan0 active",
+        "ok": up,
+        "detail": detail,
+    }
+
+
+def check_dependencies(app_config: dict) -> List[dict]:
+    """
+    Construit la liste de tous les diagnostics.
+    app_config est app.config (Flask), on récupère LOG_FILE, BACKUP_DIR, etc.
+    """
+    checks: List[dict] = []
+
+    # Modules Python
+    for m in ["flask", "json", "subprocess", "zipfile", "hashlib", "secrets", "base64"]:
+        checks.append(_check_python_module(m))
+
+    # Binaires
+    for b in ["qmicli", "ip", "ping", "zip", "unzip", "crontab", "systemctl", "fuser"]:
+        checks.append(_check_binary(b))
+
+    # Fichiers / Dossiers depuis la config Flask
+    sms_script = app_config.get("SMS_SCRIPT", "/home/xavier/send_sms.py")
+    log_file = app_config.get("LOG_FILE", "/home/xavier/monitor.log")
+    backup_dir = app_config.get("BACKUP_DIR", "/home/xavier/backups")
+    upload_dir = app_config.get("UPLOAD_DIR", "/home/xavier/restore_tmp")
+
+    # SMS_SCRIPT
+    checks.append(_check_file_exists(sms_script, "send_sms.py"))
+    # Dossier du LOG_FILE
+    log_dir = os.path.dirname(log_file)
+    checks.append(_check_dir_writable(log_dir, "Dossier du LOG_FILE"))
+    # BACKUP_DIR
+    if not os.path.isdir(backup_dir):
         try:
-            exec(code, {})
-            add(f"Module Python: {mod_name}", True)
-        except Exception as e:
-            add(f"Module Python: {mod_name}", False, str(e))
+            os.makedirs(backup_dir, exist_ok=True)
+        except Exception:
+            pass
+    checks.append(_check_dir_writable(backup_dir, "BACKUP_DIR"))
+    # UPLOAD_DIR
+    if not os.path.isdir(upload_dir):
+        try:
+            os.makedirs(upload_dir, exist_ok=True)
+        except Exception:
+            pass
+    checks.append(_check_dir_writable(upload_dir, "UPLOAD_DIR"))
 
-    # --- Binaires système ---
-    for bin_ in ["qmicli", "ip", "ping", "zip", "unzip", "crontab", "systemctl", "fuser"]:
-        path = which_cmd(bin_)
-        add(f"Binaire: {bin_}", path is not None, path or "absent")
+    # Scripts principaux
+    base_home = "/home/xavier"
+    scripts = [
+        ("monitor_failover.py", os.path.join(base_home, "monitor_failover.py")),
+        ("connect_4g.sh", os.path.join(base_home, "connect_4g.sh")),
+        ("run_dashboard.py", os.path.join(base_home, "run_dashboard.py")),
+        ("send_sms.py", os.path.join(base_home, "send_sms.py")),
+    ]
+    for label, path in scripts:
+        checks.append(_check_file_exists(path, label))
+        checks.append(_check_executable(path, label))
 
-    # --- Fichiers / permissions ---
-    add(
-        "Fichier SMS_SCRIPT",
-        os.path.exists(app_config["SMS_SCRIPT"]),
-        app_config["SMS_SCRIPT"],
-    )
+    # Périphérique /dev/cdc-wdm0
+    qmi_dev = app_config.get("QMI_DEVICE", "/dev/cdc-wdm0")
+    checks.append(_check_device(qmi_dev, qmi_dev))
 
-    log_dir = os.path.dirname(app_config["LOG_FILE"])
-    add("Dossier du LOG_FILE inscriptible", is_writable(log_dir), log_dir)
+    # Interface wwan0
+    wwan_if = app_config.get("WWAN_INTERFACE", "wwan0")
+    checks.append(_check_iface(wwan_if))
 
-    add("Dossier BACKUP_DIR", os.path.isdir(app_config["BACKUP_DIR"]), app_config["BACKUP_DIR"])
-    add("BACKUP_DIR inscriptible", is_writable(app_config["BACKUP_DIR"]), app_config["BACKUP_DIR"])
+    # Services systemd
+    checks.append(_check_service("failover-dashboard.service"))
+    checks.append(_check_service("failover-monitor.service"))
 
-    add("Dossier UPLOAD_DIR", os.path.isdir(app_config["UPLOAD_DIR"]), app_config["UPLOAD_DIR"])
-    add("UPLOAD_DIR inscriptible", is_writable(app_config["UPLOAD_DIR"]), app_config["UPLOAD_DIR"])
+    # Module SIM7600E & ports série
+    checks.append(_check_lsusb_sim7600())
+    checks.append(_check_ttyusb_ports())
 
-    # Présence et exécution des scripts principaux
-    for p in [
-        "/home/xavier/monitor_failover.py",
-        "/home/xavier/connect_4g.sh",
-        "/home/xavier/run_dashboard.py",
-        "/home/xavier/send_sms.py",
-    ]:
-        if os.path.exists(p):
-            add(f"Présence: {os.path.basename(p)}", True, p)
-            add(f"Executable: {os.path.basename(p)}", is_executable(p), p)
-        else:
-            add(f"Présence: {os.path.basename(p)}", False, p)
-
-    # --- Matériel / réseau ---
-    add("Périphérique /dev/cdc-wdm0", os.path.exists("/dev/cdc-wdm0"), "/dev/cdc-wdm0")
-
-    links = run("ip -o link")
-    wwan_present = "wwan0" in (links or "")
-    add("Interface wwan0", wwan_present, links if links != "N/A" else "N/A")
-
-    # --- Services systemd ---
-    for svc in ["failover-dashboard.service", "failover-monitor.service"]:
-        state = run(f"systemctl is-active {svc}")
-        ok = state in ("active", "activating")
-        add(f"Service {svc}", ok, state if state != "N/A" else "inconnu")
-
-    # --- Module SIM7600E (USB) ---
-    usb_out = run("lsusb")
-    add(
-        "Module SIM7600E (lsusb)",
-        ("1e0e" in usb_out) or ("SimTech" in usb_out),
-        usb_out if usb_out != "N/A" else "N/A",
-    )
-
-    # --- Ports série ---
-    ports = run("ls /dev/ttyUSB*")
-    add(
-        "Port série (ttyUSB*)",
-        "/dev/ttyUSB" in ports,
-        ports if ports != "N/A" else "N/A",
-    )
-
-    # --- Signal SIM7600E ---
-    signal_txt, _, color = get_signal()
-    add("Signal SIM7600E", color != "gray", signal_txt)
-
-    # =========================================================================
-    # STATUT CARTE SIM / MODEM / PIN / DATA
-    # =========================================================================
-
-    # SIM détectée ?
-    sim_status = run("qmicli -d /dev/cdc-wdm0 --uim-get-card-status 2>/dev/null")
-    sim_ok = "card" in sim_status.lower() or "slot" in sim_status.lower()
-    add("SIM : Détection carte", sim_ok, sim_status if sim_status != "N/A" else "")
-
-    # Code PIN
-    pin_raw = run("qmicli -d /dev/cdc-wdm0 --uim-get-pin-status 2>/dev/null")
-    if "PIN1" in pin_raw:
-        if "enabled" in pin_raw.lower():
-            # PIN activé → si non renseigné dans config, c'est KO
-            add("SIM : PIN requis", False, pin_raw)
-        else:
-            add("SIM : PIN OK", True, pin_raw)
-    else:
-        add("SIM : PIN (info)", False, pin_raw if pin_raw != "N/A" else "Indisponible")
-
-    # Modem enregistré sur le réseau
-    serving = run("qmicli -d /dev/cdc-wdm0 --nas-get-serving-system 2>/dev/null")
-    registered = any(k in serving.lower() for k in ["registered", "camped", "attached"])
-    add("Modem : Enregistrement réseau", registered, serving if serving != "N/A" else "N/A")
-
-    # Interface data / APN actif
-    wwan = run("ip a show wwan0 2>/dev/null")
-    data_ok = "state up" in wwan.lower() or "inet " in wwan.lower()
-    add("Modem : Interface wwan0 active", data_ok, wwan if wwan != "N/A" else "N/A")
+    # Signal, SIM, modem
+    checks.append(check_modem_signal())
+    checks.append(check_sim_card())
+    checks.append(check_sim_pin())
+    checks.append(check_modem_registration())
+    checks.append(check_wwan_active(wwan_if))
 
     return checks

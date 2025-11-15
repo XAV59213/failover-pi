@@ -1,1 +1,292 @@
-/* (mêmes contenus que plus haut, je ne recopie pas pour alléger) */
+/* ========================================================================
+   Failover-Pi Dashboard - Style Général (Dark Mode)
+   ======================================================================== */
+
+:root {
+    --bg: #0d1117;
+    --bg-card: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --danger: #f85149;
+    --warning: #f0883e;
+    --success: #3fb950;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    padding: 16px;
+}
+
+/* ---------------------- TOPBAR ---------------------- */
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-card);
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 16px;
+    color: var(--muted);
+    font-size: 0.9em;
+}
+
+.topbar a {
+    color: var(--muted);
+    margin-left: 12px;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.topbar a:hover {
+    color: var(--accent);
+}
+
+.topbar a.active {
+    color: var(--accent) !important;
+}
+
+/* ---------------------- CONTAINER ---------------------- */
+
+.container {
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+/* ---------------------- CARDS ---------------------- */
+
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 12px 0;
+}
+
+/* ---------------------- BUTTONS ---------------------- */
+
+.btn {
+    border: none;
+    padding: 12px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s ease;
+    font-size: 0.9em;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: #fff;
+}
+
+.btn-success {
+    background: var(--success);
+    color: #fff;
+}
+
+.btn-warning {
+    background: var(--warning);
+    color: #fff;
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: #fff;
+}
+
+.btn-secondary {
+    background: var(--border);
+    color: var(--text);
+}
+
+.btn-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.btn-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.center {
+    text-align: center;
+}
+
+/* ---------------------- LOGS ---------------------- */
+
+.log {
+    background: #010409;
+    padding: 8px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: .85em;
+    margin: 4px 0;
+    color: var(--muted);
+}
+
+.log strong {
+    color: var(--accent);
+}
+
+/* Zone logs avec scroll + toolbar */
+
+.log-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.log-box {
+    max-height: 260px;
+    overflow-y: auto;
+    margin-top: 4px;
+    background: #010409;
+    padding: 8px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: .8em;
+    color: var(--muted);
+    white-space: pre-wrap;
+}
+
+/* ---------------------- INPUTS ---------------------- */
+
+input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* ---------------------- TABLES ---------------------- */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th, table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+table th {
+    text-align: left;
+    color: var(--accent);
+}
+
+/* ---------------------- LED INDICATOR ---------------------- */
+
+.led {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 6px transparent;
+}
+
+.led-freebox {
+    background: var(--success);
+    box-shadow: 0 0 8px var(--success);
+}
+
+.led-4g {
+    background: var(--danger);
+    box-shadow: 0 0 8px var(--danger);
+}
+
+.led-unknown {
+    background: var(--border);
+}
+
+/* ---------------------- STATUS CARD ---------------------- */
+
+.status-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.status-main {
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.status-sub {
+    font-size: .8em;
+    color: var(--muted);
+}
+
+/* ---------------------- SIGNAL 4G BAR ---------------------- */
+
+.signal-wrapper {
+    margin-top: 8px;
+}
+
+.signal-bar {
+    width: 100%;
+    height: 14px;
+    background: #010409;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.signal-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--danger), var(--warning), var(--success));
+}
+
+.signal-text {
+    margin-top: 6px;
+    font-size: .85em;
+    color: var(--muted);
+}
+
+/* ---------------------- CHART CONTAINER ---------------------- */
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    max-height: 220px;
+}
+
+/* ---------------------- GRID (Diagnostics en colonnes) ---------------------- */
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+}
+
+/* ---------------------- SMALL FOOTER TIME ---------------------- */
+
+.time {
+    font-size: .75em;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 12px;
+}
