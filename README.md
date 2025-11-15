@@ -1,3 +1,4 @@
+![Failover Pi](https://raw.githubusercontent.com/XAV59213/failover-pi/main/img/E09654EF-A775-4929-B87B-03CD3E1302D3.png)
 # Failover-Pi  
 Système complet de bascule automatique Freebox → 4G (SIM7600E)  
 avec Dashboard Web, sauvegardes, restauration et supervision.
