@@ -9,7 +9,13 @@
 
 <div class="card">
     <h3>Derniers logs</h3>
-    <pre>{{ logs | join("\n") }}</pre>
+
+    <div class="log-toolbar">
+        <button class="btn btn-secondary" onclick="toggleLogs()">📂 Réduire / Ouvrir</button>
+        <button class="btn btn-secondary" onclick="copyLogs()">📋 Copier tout</button>
+    </div>
+
+    <pre id="logbox">{{ logs | join("\n") }}</pre>
 </div>
 
 <div class="card">
