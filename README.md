@@ -20,12 +20,7 @@ avec Dashboard Web, sauvegardes, restauration et supervision.
 - Test SMS, reboot 4G, reboot/arrêt du Raspberry Pi
 - Backup & restore complet (.zip)
 - Gestion utilisateurs (Admin + Users limités)
-
-  
-![Mon super screenshot](img/Capture d’écran du 2025-11-15 18-58-38.png)
-
-img/Capture d’écran du 2025-11-15 18-58-38.png
-
+![Mon super screenshot](img/Capture%20d’écran%20du%202025-11-15%2018-58-38.png)
 ### 🔐 **Sécurité**
 - Authentification complète (login + setup)
 - Gestion multi-utilisateurs
