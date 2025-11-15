@@ -4,23 +4,51 @@
 
 <div class="card">
     <h3>Sauvegardes disponibles</h3>
-    <ul>
-        {% for b in backups %}
-        <li><a class="btn" href="/backup/download/{{ b }}">⬇️ {{ b }}</a></li>
-        {% endfor %}
-    </ul>
+
+    {% if backups and backups|length > 0 %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom du backup</th>
+                    <th style="text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in backups %}
+                <tr>
+                    <td>{{ b }}</td>
+                    <td style="text-align:right;">
+                        <!-- Télécharger -->
+                        <a class="btn btn-secondary" href="/backup/download/{{ b }}">
+                            ⬇️ Télécharger
+                        </a>
+
+                        <!-- Restaurer ce backup -->
+                        <a class="btn btn-success"
+                           href="/restore_existing/{{ b }}"
+                           onclick="return confirm('Restaurer le backup {{ b }} et redémarrer le Pi ?');">
+                            ♻️ Restaurer
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Aucune sauvegarde trouvée pour l’instant.</p>
+    {% endif %}
 </div>
 
 <div class="card">
-    <h3>Créer une sauvegarde</h3>
-    <a class="btn" href="/backup/create">📦 Sauvegarder maintenant</a>
+    <h3>Créer une nouvelle sauvegarde</h3>
+    <a class="btn btn-primary" href="/backup/create">📦 Sauvegarder maintenant</a>
 </div>
 
 <div class="card">
-    <h3>Restaurer</h3>
+    <h3>Restaurer depuis un fichier uploadé</h3>
     <form action="/restore" method="post" enctype="multipart/form-data">
         <input type="file" name="zipfile" required>
-        <button class="btn">♻️ Restaurer</button>
+        <button class="btn btn-warning">♻️ Restaurer (upload)</button>
     </form>
 </div>
 

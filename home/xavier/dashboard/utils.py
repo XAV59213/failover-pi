@@ -89,49 +89,91 @@ def get_logs(log_file: str, limit: int = 80) -> List[str]:
         return []
 
 
-def get_freebox_history(log_file: str) -> Tuple[List[str], List[int]]:
+def get_freebox_history(log_file: str):
     """
-    Lit un fichier d'historique structuré (status_history.json) si présent,
-    sinon tente de dériver de monitor.log.
-    Retourne (times, states) avec state=1 pour Freebox, 0 pour 4G.
-    """
-    hist_file = "/home/xavier/status_history.json"
-    times: List[str] = []
-    states: List[int] = []
+    Renvoie l'historique Freebox / 4G pour l'affichage du graphique.
 
-    # Priorité au fichier JSON structuré
-    if os.path.exists(hist_file):
+    Format recommandé de /home/xavier/status_history.json :
+    {
+      "times": ["06:43", "06:44", ...],
+      "states": [1, 1, 0, ...]   # 1 = Freebox, 0 = 4G
+    }
+
+    On :
+      - lit ce JSON si présent,
+      - normalise les valeurs d'état,
+      - ne garde que les N derniers points (pour un graphe lisible),
+      - sinon, fallback : parsing du fichier de log.
+    """
+    history_file = "/home/xavier/status_history.json"
+    MAX_POINTS = 60  # nombre max de points sur le graphe
+
+    # --- 1) Fichier structuré (recommandé) ---
+    if os.path.exists(history_file):
         try:
-            with open(hist_file, "r", encoding="utf-8") as f:
+            with open(history_file, "r") as f:
                 data = json.load(f)
+
             times = data.get("times", [])
             states = data.get("states", [])
-            if isinstance(times, list) and isinstance(states, list):
-                return times[-200:], states[-200:]
+
+            # Alignement tailles
+            n = min(len(times), len(states))
+            times = times[-n:]
+            states = states[-n:]
+
+            # Normalisation des états :
+            #  - 1  => Freebox
+            #  - 0  => 4G
+            #  - tout le reste (ex: -1) => on force à 0 pour ne pas casser l'échelle
+            norm_states = []
+            for s in states:
+                try:
+                    v = int(s)
+                except Exception:
+                    v = 0
+                if v <= 0:
+                    v = 0
+                else:
+                    v = 1
+                norm_states.append(v)
+
+            states = norm_states
+
+            # On limite le nombre de points pour garder un graphe lisible
+            n = min(len(times), len(states), MAX_POINTS)
+            if n > 0:
+                return times[-n:], states[-n:]
+            else:
+                return [], []
         except Exception:
+            # En cas de problème de lecture, fallback sur les logs
             pass
 
-    # Fallback simplifié: on parse les lignes du log
+    # --- 2) Fallback : parsing du fichier de log (ancien système) ---
     if not os.path.exists(log_file):
         return [], []
 
+    times, states = [], []
     try:
-        with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
-            for line in f:
-                line = line.strip()
-                if "] [STATUS]" in line and "Freebox" in line:
-                    # Exemple:
-                    # [15/11/2025 09:52:06] [STATUS] Freebox LAN=KO Internet=KO / 4G=KO
-                    try:
-                        ts_part = line.split("]", 1)[0].lstrip("[")
-                        status_part = line.split("] [STATUS]", 1)[1]
-                        # On considère que si "Internet=OK" → état Freebox=1 sinon 0
-                        state = 1 if "Internet=OK" in status_part else 0
-                        times.append(ts_part)
-                        states.append(state)
-                    except Exception:
-                        continue
-        return times[-200:], states[-200:]
+        with open(log_file) as f:
+            lines = f.readlines()
+
+        # On ne garde que les dernières lignes pertinentes
+        for line in lines[-500:]:
+            if "Freebox OK" in line or "4G ACTIVE" in line:
+                try:
+                    time_part = line.split("]")[0].replace("[", "").strip()
+                except Exception:
+                    continue
+
+                state = 1 if "Freebox OK" in line else 0
+                times.append(time_part)
+                states.append(state)
+
+        # On limite aussi ici
+        n = min(len(times), len(states), MAX_POINTS)
+        return times[-n:], states[-n:]
     except Exception:
         return [], []
 
