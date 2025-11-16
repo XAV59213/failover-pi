@@ -1,28 +1,87 @@
 {% extends "base.html" %}
-
 {% block content %}
-<h2>⚙️ Configuration réseau</h2>
 
-<form method="post">
-    <label>APN</label>
-    <input name="apn" value="{{ cfg.apn }}">
+<h2>Configuration</h2>
 
-    <label>PIN SIM</label>
-    <input name="sim_pin" value="{{ cfg.sim_pin }}">
+<form method="post" enctype="multipart/form-data">
+    <!-- Bloc Réseau -->
+    <div class="card" style="margin-top:20px;">
+        <h3>Configuration réseau</h3>
+        <p>Paramètres réseau du Pi et du failover.</p>
 
-    <label>Numéro SMS</label>
-    <input name="sms_phone" value="{{ cfg.sms_phone }}">
+        <div class="form-group">
+            <label>Gateway (IP de la Freebox)</label>
+            <input type="text" name="gateway" value="{{ cfg.gateway }}" class="form-control" placeholder="ex: 192.168.0.254">
+        </div>
 
-    <label>Gateway</label>
-    <input name="gateway" value="{{ cfg.gateway }}">
+        <div class="form-group">
+            <label>Port dashboard</label>
+            <input type="number" name="port" value="{{ cfg.port }}" class="form-control" min="1024" max="65535">
+        </div>
+    </div>
 
-    <label>Port Dashboard</label>
-    <input name="port" value="{{ cfg.port }}">
+    <!-- Bloc SIM -->
+    <div class="card" style="margin-top:20px;">
+        <h3>Configuration SIM</h3>
+        <p>Paramètres pour la SIM 4G (APN, opérateur, etc).</p>
 
-    <label>Port Série SIM7600</label>
-    <input name="serial_port" value="{{ cfg.serial_port }}">
+        <div class="form-group">
+            <label>APN</label>
+            <input type="text" name="apn" value="{{ cfg.apn }}" class="form-control" placeholder="ex: free">
+        </div>
 
-    <button class="btn">💾 Enregistrer</button>
+        <div class="form-group">
+            <label>PIN SIM (laisser vide si aucun)</label>
+            <input type="text" name="sim_pin" value="{{ cfg.sim_pin }}" class="form-control" maxlength="4" placeholder="ex: 1234">
+        </div>
+
+        <div class="form-group">
+            <label>Port série modem</label>
+            <input type="text" name="serial_port" value="{{ cfg.serial_port }}" class="form-control" placeholder="ex: /dev/ttyUSB3">
+        </div>
+
+        <div class="form-group">
+            <label>Numéros SMS (un par ligne)</label>
+            <textarea name="sms_recipients" class="form-control" rows="4" placeholder="ex:&#10;+33612345678&#10;+33787654321">{{ recipients_preview }}</textarea>
+        </div>
+    </div>
+
+    <!-- Bloc Template -->
+    <div class="card" style="margin-top:20px;">
+        <h3>Configuration Template</h3>
+
+        <p>Logo actuel :</p>
+        {% if logo_exists %}
+            <img src="{{ url_for('static', filename='img/logo.png') }}?t={{ range(1000000) | random }}" width="36" height="36" style="border-radius:6px;">
+        {% else %}
+            <p><i>Aucun logo défini</i></p>
+        {% endif %}
+
+        <div class="form-group">
+            <label>Envoyer un logo (PNG/JPG)</label>
+            <input type="file" name="logo" accept="image/png,image/jpeg" class="form-control">
+        </div>
+    </div>
+
+    <!-- Bouton Enregistrer -->
+    <div style="margin-top: 25px; text-align: center;">
+        <button type="submit" class="btn btn-success" style="padding: 12px 30px; font-size: 1.1em;">
+            Enregistrer toute la configuration
+        </button>
+    </div>
 </form>
+
+<!-- Messages -->
+{% if message %}
+<div class="alert alert-success" style="margin-top:20px;">
+    {{ message }}
+</div>
+{% endif %}
+
+{% if error %}
+<div class="alert alert-danger" style="margin-top:20px;">
+    {{ error }}
+</div>
+{% endif %}
 
 {% endblock %}

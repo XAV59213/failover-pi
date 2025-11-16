@@ -45,45 +45,70 @@
 
       .topbar-left {
           font-weight: 600;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
       }
 
       .topbar-user {
           font-size: 0.85em;
           color: var(--muted);
       }
-/* ------------ Petits boutons pour Backup -------------- */
 
-.btn-small {
-    display:inline-block;
-    padding:4px 8px;
-    font-size:0.75em;
-    border-radius:6px;
-    text-decoration:none;
-    font-weight:600;
-    margin-left:4px;
-    background:#30363d;
-    color:#fff;
-}
+      /* Zone logo + titre */
+      .topbar-brand {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+      }
 
-.btn-small:hover {
-    opacity:0.85;
-}
+      .topbar-logo {
+          width: 36px;
+          height: 36px;
+          border-radius: 6px;
+          object-fit: contain;
+      }
 
-.btn-green {
-    background:#3fb950 !important;
-}
+      /* ------------ Petits boutons pour Backup -------------- */
+      .btn-small {
+          display:inline-block;
+          padding:4px 8px;
+          font-size:0.75em;
+          border-radius:6px;
+          text-decoration:none;
+          font-weight:600;
+          margin-left:4px;
+          background:#30363d;
+          color:#fff;
+      }
 
-.btn-red {
-    background:#f85149 !important;
-}
+      .btn-small:hover {
+          opacity:0.85;
+      }
 
+      .btn-green {
+          background:#3fb950 !important;
+      }
+
+      .btn-red {
+          background:#f85149 !important;
+      }
     </style>
 </head>
 <body>
 
 <header class="topbar">
     <div class="topbar-left">
-        Failover-Pi Dashboard
+
+        <div class="topbar-brand">
+            {# Affiche le logo si le fichier existe dans static/img/logo.png #}
+            <img src="{{ url_for('static', filename='img/logo.png') }}"
+                 alt="Logo Failover-Pi"
+                 class="topbar-logo"
+                 onerror="this.style.display='none';">
+            <span>Failover-Pi Dashboard</span>
+        </div>
+
         {% if session.get("user") %}
             <span class="topbar-user">
                 — connecté : <strong>{{ session["user"]["username"] }}</strong>

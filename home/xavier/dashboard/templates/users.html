@@ -4,13 +4,17 @@
 
 <div class="card">
     <h3>Créer un utilisateur</h3>
-    <form method="post" action="/users/create">
-        <input name="username" placeholder="Nom utilisateur">
-        <input name="password" placeholder="Mot de passe">
+    <form method="post" action="{{ url_for('users') }}">
+        <input type="hidden" name="action" value="add">
+
+        <input name="new_username" placeholder="Nom utilisateur" required>
+        <input name="new_password" type="password" placeholder="Mot de passe" required>
+
         <select name="role">
             <option value="user">Utilisateur</option>
             <option value="admin">Admin</option>
         </select>
+
         <button class="btn">Créer</button>
     </form>
 </div>
@@ -25,7 +29,14 @@
             <td>{{ u.username }}</td>
             <td>{{ u.role }}</td>
             <td>
-                <a class="btn" href="/users/delete/{{ u.username }}">Supprimer</a>
+                <form method="post"
+                      action="{{ url_for('users') }}"
+                      style="display:inline"
+                      onsubmit="return confirm('Supprimer {{ u.username }} ?');">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="username" value="{{ u.username }}">
+                    <button class="btn btn-danger">Supprimer</button>
+                </form>
             </td>
         </tr>
         {% endfor %}

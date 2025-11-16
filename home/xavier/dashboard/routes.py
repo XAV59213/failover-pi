@@ -108,7 +108,6 @@ def register_routes(app):
     # ==============================================================
     @app.route("/setup", methods=["GET", "POST"])
     def setup():
-        # Si un admin existe déjà -> on renvoie vers /login
         if admin_exists(USERS_DB):
             return redirect(url_for("login"))
 
@@ -133,17 +132,14 @@ def register_routes(app):
                     return redirect(url_for("login"))
                 error = "Impossible d'enregistrer l'utilisateur."
 
-        # Tu peux ajouter l'affichage de error dans setup.html si tu veux
         return render_template("setup.html", error=error)
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
-        # Tant qu'il n'y a pas d'admin -> forcer /setup
         if not admin_exists(USERS_DB):
             return redirect(url_for("setup"))
 
         error = ""
-
         if request.method == "POST":
             username = (request.form.get("username") or "").strip()
             password = request.form.get("password") or ""
@@ -177,8 +173,6 @@ def register_routes(app):
         gw_text, _ = get_gateway(CONFIG_FILE)
         signal_text, signal_percent, _ = get_signal()
         logs = get_logs(LOG_FILE)
-
-        # Historique Freebox / 4G (pour plus tard si tu veux un graphique)
         times, states = get_freebox_history(LOG_FILE)
 
         return render_template(
@@ -251,17 +245,13 @@ def register_routes(app):
     @admin_required
     def clear_logs():
         try:
-            # Vide monitor.log
             open(LOG_FILE, "w").close()
-
-            # Remise à zéro de l'historique structuré
             history_file = "/home/xavier/status_history.json"
             try:
                 with open(history_file, "w") as f:
                     f.write('{"times":[],"states":[]}')
             except Exception:
                 pass
-
             log_entry = log("[ACTION] Logs effacés via dashboard", LOG_FILE)
             return success_page("Logs effacés", log_entry)
         except Exception as e:
@@ -271,60 +261,26 @@ def register_routes(app):
     # ==============================================================
     #  BACKUP / RESTORE
     # ==============================================================
-    def _restore_from_zip(zip_path: str):
-        """
-        Restaure les fichiers home/xavier/ depuis un ZIP créé par /backup.
-        """
-        base_home = "/home/xavier"
-        if not os.path.exists(zip_path):
-            raise FileNotFoundError(zip_path)
-
-        with zipfile.ZipFile(zip_path, "r") as z:
-            for member in z.namelist():
-                if not member.startswith("home/xavier/"):
-                    continue
-                rel = member[len("home/xavier/"):].lstrip("/")
-                if not rel:
-                    continue
-
-                dest_path = os.path.join(base_home, rel)
-
-                if member.endswith("/"):
-                    os.makedirs(dest_path, exist_ok=True)
-                    continue
-
-                os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-                with z.open(member) as src, open(dest_path, "wb") as dst:
-                    shutil.copyfileobj(src, dst)
-
-        # Remettre les exécutables
-        for f in ["connect_4g.sh", "monitor_failover.py", "run_dashboard.py", "send_sms.py"]:
-            p = os.path.join(base_home, f)
-            if os.path.exists(p):
-                os.chmod(p, 0o755)
-
     @app.route("/backup")
     @admin_required
     def backup():
-        backups = list_backups(BACKUP_DIR)
+        backups = list_backups(app.config["BACKUP_DIR"])
         return render_template("backup.html", backups=backups)
 
     @app.route("/backup/create")
     @admin_required
-    def backup_create():
+    def create_backup():
         ts = datetime.now().strftime("%Y%m%d-%H%M%S")
         backup_name = f"failoverpi-backup-{ts}.zip"
-        backup_path = os.path.join(BACKUP_DIR, backup_name)
+        backup_path = os.path.join(app.config["BACKUP_DIR"], backup_name)
         base_home = "/home/xavier"
 
         try:
             with zipfile.ZipFile(backup_path, "w", zipfile.ZIP_DEFLATED) as z:
-
                 def add_if_exists(path, arcname=None):
                     if os.path.exists(path):
                         z.write(path, arcname or path)
 
-                # Fichiers principaux
                 add_if_exists(os.path.join(base_home, "config.json"), "home/xavier/config.json")
                 add_if_exists(os.path.join(base_home, "monitor_failover.py"), "home/xavier/monitor_failover.py")
                 add_if_exists(os.path.join(base_home, "run_dashboard.py"), "home/xavier/run_dashboard.py")
@@ -334,103 +290,101 @@ def register_routes(app):
                 add_if_exists(os.path.join(base_home, "monitor.log"), "home/xavier/monitor.log")
                 add_if_exists(os.path.join(base_home, ".dashboard_users.json"), "home/xavier/.dashboard_users.json")
 
-                # Dossier dashboard complet
                 dash_dir = os.path.join(base_home, "dashboard")
                 if os.path.isdir(dash_dir):
                     for root, dirs, files in os.walk(dash_dir):
+                        if ".git" in root:
+                            continue
                         for f in files:
                             full = os.path.join(root, f)
                             rel = os.path.relpath(full, base_home)
                             arc = os.path.join("home/xavier", rel)
                             z.write(full, arc)
 
-            log_entry = log(f"[BACKUP] Backup créé: {backup_name}", LOG_FILE)
-            return success_page(
-                "Backup créé",
-                f"Fichier : {backup_name}<br><small>{log_entry}</small>",
-            )
+            log_entry = log(f"[BACKUP] Backup créé: {backup_name}", app.config["LOG_FILE"])
+            return success_page("Backup créé", f"Fichier : {backup_name}<br><small>{log_entry}</small>")
 
         except Exception as e:
-            error = log(f"[BACKUP] Erreur backup: {e}", LOG_FILE)
+            error = log(f"[BACKUP] Erreur backup: {e}", app.config["LOG_FILE"])
             return error_page("Erreur Backup", error)
 
     @app.route("/backup/download/<name>")
     @login_required
-    def backup_download(name):
+    def download_backup(name):
         safe_name = os.path.basename(name)
-        path = os.path.join(BACKUP_DIR, safe_name)
+        path = os.path.join(app.config["BACKUP_DIR"], safe_name)
         if not os.path.exists(path):
             return error_page("Backup introuvable", safe_name)
         return send_file(path, as_attachment=True)
 
-    @app.route("/delete_backup/<name>")
+    @app.route("/backup/delete/<name>")
     @admin_required
     def delete_backup(name):
         safe_name = os.path.basename(name)
-        path = os.path.join(BACKUP_DIR, safe_name)
+        path = os.path.join(app.config["BACKUP_DIR"], safe_name)
         if not os.path.exists(path):
             return error_page("Backup introuvable", safe_name)
         try:
             os.remove(path)
-            log_entry = log(f"[BACKUP] Backup supprimé: {safe_name}", LOG_FILE)
+            log_entry = log(f"[BACKUP] Backup supprimé: {safe_name}", app.config["LOG_FILE"])
             return success_page("Backup supprimé", log_entry)
         except Exception as e:
-            error = log(f"[BACKUP] Erreur suppression backup: {e}", LOG_FILE)
+            error = log(f"[BACKUP] Erreur suppression backup: {e}", app.config["LOG_FILE"])
             return error_page("Erreur Suppression Backup", error)
 
     @app.route("/restore", methods=["POST"])
     @admin_required
     def restore():
-        # compat : zipfile (backup.html) ou backup_file (ancienne version)
-        file = request.files.get("zipfile") or request.files.get("backup_file")
+        file = request.files.get("backup_file")
         if not file:
             return error_page("Aucun fichier", "Aucun fichier de backup fourni.")
         if not file.filename.lower().endswith(".zip"):
             return error_page("Format invalide", "Le fichier doit être un .zip")
 
-        os.makedirs(UPLOAD_DIR, exist_ok=True)
-        dest_path = os.path.join(UPLOAD_DIR, f"upload-{int(time.time())}.zip")
+        upload_dir = app.config["UPLOAD_DIR"]
+        os.makedirs(upload_dir, exist_ok=True)
+        dest_path = os.path.join(upload_dir, f"upload-{int(time.time())}.zip")
         file.save(dest_path)
 
         try:
             _restore_from_zip(dest_path)
             log_entry = log(
                 f"[RESTORE] Backup restauré depuis upload: {os.path.basename(dest_path)}",
-                LOG_FILE,
+                app.config["LOG_FILE"],
             )
         except Exception as e:
-            error = log(f"[RESTORE] Erreur restauration: {e}", LOG_FILE)
+            error = log(f"[RESTORE] Erreur restauration: {e}", app.config["LOG_FILE"])
             return error_page("Erreur Restauration", error)
 
         try:
             subprocess.Popen(["sudo", "reboot"])
         except Exception as e:
-            log(f"[RESTORE] Erreur lors du reboot: {e}", LOG_FILE)
+            log(f"[RESTORE] Erreur lors du reboot: {e}", app.config["LOG_FILE"])
 
         return success_page(
             "Restauration en cours",
             f"Backup restauré, le Pi va redémarrer.<br><small>{log_entry}</small>",
         )
 
-    @app.route("/restore_existing/<name>")
+    @app.route("/backup/restore_existing/<name>")
     @admin_required
     def restore_existing(name):
         safe_name = os.path.basename(name)
-        path = os.path.join(BACKUP_DIR, safe_name)
+        path = os.path.join(app.config["BACKUP_DIR"], safe_name)
         if not os.path.exists(path):
             return error_page("Backup introuvable", safe_name)
 
         try:
             _restore_from_zip(path)
-            log_entry = log(f"[RESTORE] Backup restauré: {safe_name}", LOG_FILE)
+            log_entry = log(f"[RESTORE] Backup restauré: {safe_name}", app.config["LOG_FILE"])
         except Exception as e:
-            error = log(f"[RESTORE] Erreur restauration: {e}", LOG_FILE)
+            error = log(f"[RESTORE] Erreur restauration: {e}", app.config["LOG_FILE"])
             return error_page("Erreur Restauration", error)
 
         try:
             subprocess.Popen(["sudo", "reboot"])
         except Exception as e:
-            log(f"[RESTORE] Erreur lors du reboot: {e}", LOG_FILE)
+            log(f"[RESTORE] Erreur lors du reboot: {e}", app.config["LOG_FILE"])
 
         return success_page(
             "Restauration en cours",
@@ -495,17 +449,9 @@ def register_routes(app):
                 cfg["gateway"] = request.form.get("gateway", cfg.get("gateway", "192.168.0.254")).strip()
                 cfg["serial_port"] = request.form.get("serial_port", cfg.get("serial_port", "/dev/ttyUSB3")).strip()
 
-                # Liste de numéros SMS (un par ligne)
                 raw_list = request.form.get("sms_recipients", "")
-                recipients = []
-                for line in raw_list.splitlines():
-                    line = line.strip()
-                    if line:
-                        recipients.append(line)
-
+                recipients = [line.strip() for line in raw_list.splitlines() if line.strip()]
                 cfg["sms_recipients"] = recipients
-
-                # Si on a une liste, on peut utiliser le premier comme "principal"
                 if recipients:
                     cfg["sms_phone"] = recipients[0]
 
@@ -513,7 +459,7 @@ def register_routes(app):
                 try:
                     cfg["port"] = int(port_str)
                 except ValueError:
-                    pass  # on garde l'ancien port si invalide
+                    pass
 
                 if save_config(cfg, CONFIG_FILE):
                     message = "Configuration sauvegardée. Un redémarrage du service dashboard peut être nécessaire."
@@ -524,11 +470,14 @@ def register_routes(app):
             except Exception as e:
                 error = f"Erreur lors de la mise à jour : {e}"
 
-        # Pour l’instant, config.html ne montre pas message/error, mais ils sont dispo
         recipients_preview = "\n".join(
             cfg.get("sms_recipients", [])
             or ([cfg.get("sms_phone")] if cfg.get("sms_phone") else [])
         )
+
+        # Vérifier si le logo existe
+        logo_path = os.path.join(app.static_folder, 'img', 'logo.png')
+        logo_exists = os.path.isfile(logo_path)
 
         return render_template(
             "config.html",
@@ -536,7 +485,29 @@ def register_routes(app):
             message=message,
             error=error,
             recipients_preview=recipients_preview,
+            logo_exists=logo_exists,
         )
+
+    # ==============================================================
+    #  /config/template : upload du logo
+    # ==============================================================
+    @app.route('/config/template', methods=['POST'])
+    @admin_required
+    def config_template():
+        if 'logo' not in request.files:
+            return redirect(url_for('edit_config'))
+
+        file = request.files['logo']
+        if file.filename == '':
+            return redirect(url_for('edit_config'))
+
+        if file and file.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+            logo_path = os.path.join(app.static_folder, 'img', 'logo.png')
+            os.makedirs(os.path.dirname(logo_path), exist_ok=True)
+            file.save(logo_path)
+            log("[CONFIG] Logo mis à jour via dashboard", LOG_FILE)
+
+        return redirect(url_for('edit_config'))
 
     # ==============================================================
     #  /account : changer son mot de passe
@@ -586,7 +557,6 @@ def register_routes(app):
         if request.method == "POST":
             action = request.form.get("action")
 
-            # Ajout utilisateur
             if action == "add":
                 new_username = (request.form.get("username") or "").strip() or (request.form.get("new_username") or "").strip()
                 new_password = request.form.get("password") or request.form.get("new_password") or ""
@@ -612,7 +582,6 @@ def register_routes(app):
                     else:
                         error = "Erreur lors de l'enregistrement."
 
-            # Suppression utilisateur
             elif action == "delete":
                 username = request.form.get("username") or ""
                 if not username:
@@ -633,7 +602,6 @@ def register_routes(app):
                             else:
                                 error = "Erreur lors de la suppression."
 
-        # Recharger après modifs
         data = load_users(USERS_DB)
         users_list = data.get("users", [])
 

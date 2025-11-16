@@ -72278,3 +72278,1281 @@ SMS envoyé (ou en cours) vers +33610135787 : OK La connexion Internet Freebox e
 [15/11/2025 18:47:07] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
 [15/11/2025 18:48:08] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
 [15/11/2025 18:49:09] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 18:49:33] [BACKUP] Backup créé: failoverpi-backup-20251115-184932.zip
+[15/11/2025 18:50:10] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 18:51:11] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 18:52:12] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 18:53:13] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 18:54:14] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 18:55:07] [DASHBOARD] SMS Test → Test dashboard OK ! (15/11/2025)
+[15/11/2025 18:55:10] [TEST] Test failover manuel - état: Freebox OK (Internet OK) (15/11/2025 18:55:10)
+[15/11/2025 18:55:15] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 18:55:22] [ACTION] Reboot 4G demandé via dashboard
+[15/11/2025 18:55:58] [ACTION] Reboot Pi demandé via dashboard
+[15/11/2025 18:56:51] === MONITOR FAILOVER DÉMARRÉ ===
+[15/11/2025 18:56:51] [SMS] Préparation envoi : Le Raspberry Pi Failover vient de redemarrer.
+[15/11/2025 18:56:51] [SMS] ERREUR (code=1) : Numéros cibles : +33610135787
+Port série modem : /dev/ttyUSB3
+Message brut   : Le Raspberry Pi Failover vient de redemarrer.
+Message envoyé : Le Raspberry Pi Failover vient de redemarrer.
+Initialisation modem…
+Reset état modem (sortir d'un éventuel mode SMS)...
+Réponse AT : AT
+
+OK
+Modem OK après reset.
+Réponse AT+CPIN? : AT+CPIN?
+
++CPIN: READY
+
+OK
+SIM déjà prête (READY). Aucun PIN à envoyer.
+Réponse AT+CMGF=1 : AT+CMGF=1
+
+OK
+Réponse AT+CSCS="GSM" : AT+CSCS="GSM"
+
+OK
+Envoi SMS vers +33610135787 ...
+Traceback (most recent call last):
+  File "/home/xavier/send_sms.py", line 178, in <module>
+    ok, resp = send_at(ser, f'AT+CMGS="{phone}"', expected=">", timeout=5)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/xavier/send_sms.py", line 69, in send_at
+    if ser.in_waiting:
+       ^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/serial/serialposix.py", line 549, in in_waiting
+    s = fcntl.ioctl(self.fd, TIOCINQ, TIOCM_zero_str)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 5] Input/output error
+[15/11/2025 18:56:52] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 18:57:54] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 18:58:55] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 18:59:56] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:00:57] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:01:58] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:02:59] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:04:00] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:05:01] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:06:02] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:07:03] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:08:04] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:09:05] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:10:06] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:11:07] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:12:08] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:13:09] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:14:10] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:15:11] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:16:12] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:17:13] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:17:13] [AUTH] Déconnexion: admin
+[15/11/2025 19:18:14] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:19:15] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:20:16] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:21:17] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:22:18] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:23:19] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:23:53] [AUTH] Connexion: admin
+[15/11/2025 19:23:58] [AUTH] Déconnexion: admin
+[15/11/2025 19:24:02] [AUTH] Connexion: admin
+[15/11/2025 19:24:20] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:25:21] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:26:03] [AUTH] Admin créé: admin
+[15/11/2025 19:26:05] [AUTH] Connexion: admin
+[15/11/2025 19:26:22] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:27:23] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:28:24] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:29:26] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:30:27] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:31:28] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:32:29] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:33:30] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:34:31] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:35:32] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:36:33] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:37:34] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:38:35] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:39:36] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:40:37] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:41:38] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:42:39] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:43:40] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:44:41] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:45:42] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:46:43] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:47:44] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:48:11] [AUTH] Connexion: admin
+[15/11/2025 19:48:45] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:49:46] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:50:47] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:51:48] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:52:49] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:53:50] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:54:51] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:55:52] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:56:53] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:57:54] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:58:55] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 19:59:56] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:00:57] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:01:58] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:03:00] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:04:01] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:05:02] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:06:03] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:07:04] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:08:05] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:09:06] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:10:07] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:11:08] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:12:09] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:13:10] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:14:11] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:15:12] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:16:13] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:17:14] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:18:15] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:19:16] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:20:17] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:21:18] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:22:19] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:23:20] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:24:21] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:25:22] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:26:23] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:27:24] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:28:25] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:29:26] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:30:27] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:31:28] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:32:29] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:33:30] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:34:31] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:35:32] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:36:33] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:37:34] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:38:35] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:39:36] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:40:37] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:41:38] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:42:40] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:43:41] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:44:42] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:45:43] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:46:44] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:47:45] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:48:46] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:49:47] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:50:48] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:51:49] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:52:50] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:53:51] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:54:52] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:55:53] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:56:54] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:57:55] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:58:56] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 20:59:57] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:00:58] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:01:59] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:03:00] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:04:01] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:05:02] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:06:03] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:07:04] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:08:05] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:09:06] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:10:07] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:11:08] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:12:09] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:13:10] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:14:11] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:15:12] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:16:13] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:17:14] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:18:16] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:19:17] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:20:18] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:21:19] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:22:20] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:23:21] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:24:22] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:25:23] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:26:24] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:27:25] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:28:26] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:29:27] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:30:28] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:31:29] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:32:30] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:33:31] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:34:32] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:35:33] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:36:34] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:37:35] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:38:36] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:39:37] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:40:38] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:41:39] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:42:40] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:43:41] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:44:42] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:45:43] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:46:44] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:47:45] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:48:46] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:49:47] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:50:48] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:51:49] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:52:50] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:53:51] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:54:53] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:55:54] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:56:55] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:57:56] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:58:57] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 21:59:58] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:00:59] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:02:00] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:03:01] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:04:02] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:05:03] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:06:04] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:07:05] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:08:06] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:09:07] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:10:08] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:11:09] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:12:10] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:13:11] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:14:12] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:15:13] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:16:14] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:17:15] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:18:16] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:19:17] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:20:18] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:21:19] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:22:20] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:23:21] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:24:22] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:25:23] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:26:24] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:27:25] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:28:27] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:29:28] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:30:29] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:31:30] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:32:31] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:33:32] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:34:33] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:35:34] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:36:35] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:37:36] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:38:37] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:39:38] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:40:39] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:41:40] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:42:41] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:43:42] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:44:43] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:45:44] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:46:45] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:47:46] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:48:47] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:49:48] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:50:49] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:51:50] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:52:51] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:53:52] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:54:53] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:55:54] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:56:55] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:57:56] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:58:57] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 22:59:58] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:01:00] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:02:01] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:03:02] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:04:03] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:05:04] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:06:05] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:07:06] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:08:07] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:09:08] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:10:09] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:11:10] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:12:11] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:13:12] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:14:13] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:15:14] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:16:15] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:17:16] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:18:17] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:19:18] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:20:19] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:21:20] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:22:21] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:23:22] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:24:23] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:25:24] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:26:25] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:27:26] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:28:27] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:29:28] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:30:29] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:31:31] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:32:32] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:33:33] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:34:34] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:35:35] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:36:36] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:37:37] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:38:38] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:39:39] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:40:40] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:41:41] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:42:42] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:43:43] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:44:44] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:45:45] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:46:46] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:47:47] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:48:48] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:49:49] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:50:50] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:51:51] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:52:52] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:53:53] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:54:54] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:55:55] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:56:56] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:57:57] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:58:58] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[15/11/2025 23:59:59] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:01:00] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:02:01] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:03:02] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:04:04] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:05:05] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:06:06] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:07:07] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:08:08] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:09:09] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:10:10] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:11:11] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:12:12] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:13:13] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:14:14] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:15:15] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:16:16] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:17:17] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:18:18] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:19:19] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:20:20] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:21:21] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:22:22] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:23:23] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:24:24] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:25:25] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:26:26] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:27:27] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:28:28] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:29:29] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:30:30] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:31:31] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:32:32] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:33:33] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:34:34] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:35:35] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:36:36] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:37:37] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:38:38] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:39:39] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:40:40] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:41:42] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:42:43] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:43:44] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:44:45] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:45:46] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:46:47] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:47:48] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:48:49] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:49:50] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:50:51] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:51:52] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:52:53] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:53:54] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:54:55] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:55:56] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:56:57] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:57:58] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 00:58:59] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:00:00] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:01:01] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:02:02] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:03:03] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:04:04] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:05:05] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:06:06] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:07:07] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:08:08] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:09:09] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:10:10] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:11:11] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:12:12] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:13:13] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:14:14] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:15:15] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:16:16] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:17:17] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:18:18] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:19:19] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:20:21] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:21:22] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:22:23] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:23:24] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:24:25] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:25:26] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:26:27] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:27:28] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:28:29] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:29:30] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:30:31] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:31:32] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:32:33] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:33:34] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:34:35] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:35:36] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:36:37] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:37:38] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:38:39] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:39:40] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:40:41] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:41:42] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:42:43] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:43:44] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:44:45] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:45:46] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:46:47] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:47:48] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:48:49] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:49:50] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:50:51] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:51:52] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:52:53] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:53:54] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:54:55] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:55:56] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:56:58] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:57:59] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 01:59:00] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:00:01] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:01:02] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:02:03] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:03:04] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:04:05] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:05:06] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:06:07] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:07:08] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:08:09] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:09:10] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:10:11] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:11:12] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:12:13] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:13:14] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:14:15] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:15:16] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:16:17] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:17:18] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:18:19] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:19:20] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:20:21] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:21:22] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:22:23] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:23:24] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:24:25] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:25:26] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:26:27] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:27:28] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:28:29] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:29:30] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:30:31] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:31:32] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:32:33] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:33:34] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:34:35] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:35:37] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:36:38] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:37:39] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:38:40] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:39:41] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:40:42] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:41:43] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:42:44] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:43:45] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:44:46] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:45:47] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:46:48] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:47:49] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:48:50] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:49:51] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:50:52] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:51:53] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:52:54] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:53:55] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:54:56] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:55:57] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:56:58] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:57:59] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 02:59:00] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:00:01] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:01:02] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:02:03] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:03:04] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:04:05] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:05:06] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:06:07] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:07:08] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:08:09] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:09:10] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:10:12] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:11:13] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:12:14] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:13:15] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:14:16] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:15:17] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:16:18] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:17:19] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:18:20] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:19:21] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:20:22] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:21:23] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:22:24] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:23:25] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:24:26] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:25:27] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:26:28] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:27:29] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:28:30] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:29:31] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:30:32] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:31:33] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:32:34] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:33:35] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:34:36] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:35:37] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:36:38] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:37:39] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:38:40] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:39:41] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:40:42] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:41:43] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:42:44] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:43:45] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:44:46] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:45:47] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:46:48] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:47:50] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:48:51] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:49:52] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:50:53] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:51:54] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:52:55] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:53:56] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:54:57] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:55:58] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:56:59] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:58:00] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 03:59:01] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:00:02] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:01:03] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:02:04] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:03:05] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:04:06] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:05:07] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:06:08] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:07:09] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:08:10] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:09:11] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:10:12] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:11:13] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:12:14] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:13:15] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:14:16] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:15:17] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:16:18] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:17:19] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:18:20] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:19:21] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:20:22] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:21:23] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:22:24] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:23:25] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:24:26] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:25:28] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:26:29] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:27:30] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:28:31] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:29:32] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:30:33] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:31:34] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:32:35] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:33:36] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:34:37] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:35:38] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:36:39] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:37:40] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:38:41] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:39:42] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:40:43] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:41:44] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:42:45] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:43:46] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:44:47] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:45:48] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:46:49] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:47:50] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:48:51] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:49:52] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:50:53] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:51:54] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:52:55] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:53:56] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:54:57] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:55:58] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:56:59] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:58:00] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 04:59:01] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:00:02] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:01:03] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:02:04] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:03:06] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:04:07] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:05:08] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:06:09] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:07:10] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:08:11] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:09:12] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:10:13] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:11:14] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:12:15] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:13:16] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:14:17] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:15:18] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:16:19] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:17:20] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:18:21] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:19:22] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:20:23] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:21:24] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:22:25] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:23:26] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:24:27] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:25:28] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:26:29] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:27:30] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:28:31] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:29:32] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:30:33] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:31:34] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:32:35] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:33:36] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:34:37] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:35:38] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:36:39] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:37:40] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:38:41] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:39:42] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:40:44] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:41:45] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:42:46] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:43:47] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:44:48] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:45:49] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:46:50] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:47:51] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:48:52] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:49:53] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:50:54] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:51:55] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:52:56] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:53:57] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:54:58] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:55:59] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:57:00] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:58:01] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 05:59:02] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:00:03] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:01:04] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:02:05] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:03:06] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:04:07] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:05:08] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:06:09] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:07:10] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:08:11] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:09:12] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:10:13] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:11:14] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:12:15] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:13:16] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:14:17] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:15:18] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:16:20] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:17:21] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:18:22] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:19:23] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:20:24] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:21:25] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:22:26] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:23:27] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:24:28] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:25:29] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:26:30] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:27:31] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:28:32] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:29:33] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:30:34] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:31:35] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:32:36] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:33:37] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:34:38] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:35:39] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:36:40] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:37:41] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:38:42] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:39:43] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:40:44] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:41:45] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:42:46] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:43:47] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:44:48] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:45:49] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:46:51] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:47:52] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:48:53] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:49:54] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:50:55] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:51:56] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:52:57] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:53:58] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:54:59] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:56:00] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:57:01] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:58:02] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 06:59:03] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:00:04] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:01:05] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:02:06] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:03:07] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:04:08] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:05:09] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:06:10] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:07:11] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:08:12] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:09:13] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:10:14] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:11:15] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:12:16] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:13:17] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:14:18] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:15:19] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:16:20] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:17:21] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:18:22] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:19:24] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:20:25] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:21:26] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:22:27] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:23:28] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:24:29] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:25:30] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:26:31] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:27:32] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:28:33] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:29:34] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:30:35] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:31:36] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:32:37] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:33:38] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:34:39] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:35:40] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:36:41] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:37:42] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:38:43] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:39:44] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:40:45] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:41:46] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:42:47] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:43:48] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:44:49] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:45:50] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:46:51] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:47:52] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:48:53] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:49:54] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:50:55] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:51:57] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:52:58] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:53:59] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:55:00] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:56:01] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:57:02] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:58:03] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 07:59:04] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:00:05] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:01:06] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:02:07] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:03:08] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:04:09] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:05:10] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:06:11] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:07:12] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:08:13] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:09:14] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:10:15] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:11:16] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:12:17] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:13:18] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:14:19] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:15:20] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:16:21] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:17:22] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:18:23] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:19:24] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:20:25] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:21:26] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:22:27] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:23:29] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:24:30] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:25:31] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:26:32] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:27:33] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:28:34] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:29:35] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:30:36] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:31:37] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:32:38] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:33:39] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:34:40] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:35:41] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:36:42] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:37:43] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:38:44] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:39:45] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:40:46] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:41:47] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:42:48] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:43:49] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:44:50] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:45:51] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:46:52] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:47:53] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:48:54] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:49:55] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:50:56] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:51:57] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:52:58] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:53:59] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:55:01] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:56:02] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:57:03] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:58:04] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 08:59:05] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:00:06] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:01:07] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:02:08] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:03:09] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:04:10] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:05:11] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:06:12] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:07:13] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:08:14] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:09:15] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:10:16] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:11:17] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:12:18] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:13:19] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:14:20] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:15:21] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:16:22] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:17:23] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:18:24] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:19:25] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:20:26] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:21:27] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+                                                                  [16/11/2025 09:26:32] === MONITOR FAILOVER DÉMARRÉ ===
+[16/11/2025 09:26:32] [SMS] Préparation envoi : Le Raspberry Pi Failover vient de redemarrer.
+[16/11/2025 09:26:40] [SMS] OK : Numéros cibles : +33610135787
+Port série modem : /dev/ttyUSB3
+Message brut   : Le Raspberry Pi Failover vient de redemarrer.
+Message envoyé : Le Raspberry Pi Failover vient de redemarrer.
+Initialisation modem…
+Reset état modem (sortir d'un éventuel mode SMS)...
+Réponse AT : AT
+
+OK
+Modem OK après reset.
+Réponse AT+CPIN? : AT+CPIN?
+
++CPIN: SIM PIN
+
+OK
+Envoi du PIN SIM '1234' ...
+Réponse AT+CPIN="xxxx" : AT+CPIN="1234"
+
+OK
+Réponse AT+CMGF=1 : AT+CMGF=1
+
+OK
+Réponse AT+CSCS="GSM" : AT+CSCS="GSM"
+
+OK
+Envoi SMS vers +33610135787 ...
+Response AT+CMGS="+33610135787" : AT+CMGS="+33610135787"
+
+>
+Réponse envoi : +CMGS: 108
+
+OK
+SMS envoyé (ou en cours) vers +33610135787 : Le Raspberry Pi Failover vient de redemarrer.
+[16/11/2025 09:26:41] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:27:43] [STATUS] Freebox LAN=OK Internet=OK / 4G=OK
+[16/11/2025 09:28:45] [STATUS] Freebox LAN=OK Internet=OK / 4G=OK
+[16/11/2025 09:29:48] [STATUS] Freebox LAN=OK Internet=OK / 4G=OK
+[16/11/2025 09:30:18] [AUTH] Connexion: admin
+[16/11/2025 09:30:50] [STATUS] Freebox LAN=OK Internet=OK / 4G=OK
+[16/11/2025 09:31:52] [STATUS] Freebox LAN=OK Internet=OK / 4G=OK
+[16/11/2025 09:32:54] [STATUS] Freebox LAN=OK Internet=OK / 4G=OK
+[16/11/2025 09:33:56] [STATUS] Freebox LAN=OK Internet=OK / 4G=OK
+[16/11/2025 09:34:58] [STATUS] Freebox LAN=OK Internet=OK / 4G=OK
+[16/11/2025 09:36:00] [STATUS] Freebox LAN=OK Internet=OK / 4G=OK
+[16/11/2025 09:37:02] [STATUS] Freebox LAN=OK Internet=OK / 4G=OK
+[16/11/2025 09:37:53] [BACKUP] Backup créé: failoverpi-backup-20251116-093753.zip
+[16/11/2025 09:38:04] [STATUS] Freebox LAN=OK Internet=OK / 4G=OK
+[16/11/2025 09:39:06] [STATUS] Freebox LAN=OK Internet=OK / 4G=OK
+[16/11/2025 09:40:07] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:40:07] Connexion 4G (wwan0) perdue
+[16/11/2025 09:40:07] [SMS] Préparation envoi : 📵 La connexion 4G (SIM7600E) est perdue.
+[16/11/2025 09:40:13] [SMS] OK : Numéros cibles : +33610135787
+Port série modem : /dev/ttyUSB3
+Message brut   : 📵 La connexion 4G (SIM7600E) est perdue.
+Message envoyé : La connexion 4G (SIM7600E) est perdue.
+Initialisation modem…
+Reset état modem (sortir d'un éventuel mode SMS)...
+Réponse AT : AT
+
+OK
+Modem OK après reset.
+Réponse AT+CPIN? : AT+CPIN?
+
++CPIN: READY
+
+OK
+SIM déjà prête (READY). Aucun PIN à envoyer.
+Réponse AT+CMGF=1 : AT+CMGF=1
+
+OK
+Réponse AT+CSCS="GSM" : AT+CSCS="GSM"
+
+OK
+Envoi SMS vers +33610135787 ...
+Response AT+CMGS="+33610135787" : AT+CMGS="+33610135787"
+
+>
+Réponse envoi : +CMGS: 109
+
+OK
+SMS envoyé (ou en cours) vers +33610135787 : La connexion 4G (SIM7600E) est perdue.
+[16/11/2025 09:41:14] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:41:34] [USERS] Création utilisateur ggg (user)
+[16/11/2025 09:41:40] [USERS] Suppression utilisateur ggg
+[16/11/2025 09:42:15] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:43:16] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:44:17] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:45:18] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:46:19] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:47:20] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:48:21] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:49:22] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:50:23] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:51:24] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:52:25] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:53:26] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:54:27] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:55:28] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:56:29] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:57:30] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:58:31] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 09:58:47] [BACKUP] Backup supprimé: failoverpi-backup-20251113-173732.zip
+[16/11/2025 09:59:08] [BACKUP] Backup supprimé: failoverpi-backup-20251113-173914.zip
+[16/11/2025 09:59:33] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:00:34] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:01:35] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:02:36] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:03:37] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:04:31] [BACKUP] Backup supprimé: failoverpi-backup-20251113-173921.zip
+[16/11/2025 10:04:38] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:05:39] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:06:40] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:07:41] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:08:42] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:09:43] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:10:44] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:11:45] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:12:46] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:13:47] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:14:48] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:15:49] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:16:50] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:17:51] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:18:52] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:19:24] [BACKUP] Backup créé: failoverpi-backup-20251116-101924.zip
+[16/11/2025 10:19:36] [BACKUP] Backup supprimé: failoverpi-backup-20251113-191922.zip
+[16/11/2025 10:19:43] [BACKUP] Backup supprimé: failoverpi-backup-20251113-192410.zip
+[16/11/2025 10:19:50] [BACKUP] Backup supprimé: failoverpi-backup-20251114-223452.zip
+[16/11/2025 10:19:53] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:19:57] [BACKUP] Backup supprimé: failoverpi-backup-20251115-103757.zip
+[16/11/2025 10:20:54] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:21:55] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:22:56] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:23:57] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:24:58] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:25:59] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:27:01] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:28:02] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:29:03] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:29:12] [BACKUP] Backup créé: failoverpi-backup-20251116-102912.zip
+[16/11/2025 10:30:04] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:31:05] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:32:06] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:33:07] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:34:08] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:35:09] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:36:10] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:37:11] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:38:12] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:39:13] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:40:14] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:41:15] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:42:16] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:43:17] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:44:18] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:45:19] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:46:20] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:47:21] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:48:22] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:49:23] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:50:24] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:51:25] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:52:26] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:53:27] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:54:29] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:55:30] [STATUS] Freebox LAN=KO Internet=KO / 4G=KO
+[16/11/2025 10:55:30] Perte de connexion Internet Freebox
+[16/11/2025 10:55:30] [SMS] Préparation envoi : ⚠️ La Freebox n’a plus d'accès à Internet.
+[16/11/2025 10:55:35] [SMS] OK : Numéros cibles : +33610135787
+Port série modem : /dev/ttyUSB3
+Message brut   : ⚠️ La Freebox n’a plus d'accès à Internet.
+Message envoyé : ALERTE La Freebox n'a plus d'acces a Internet.
+Initialisation modem…
+Reset état modem (sortir d'un éventuel mode SMS)...
+Réponse AT : AT
+
+OK
+Modem OK après reset.
+Réponse AT+CPIN? : AT+CPIN?
+
++CPIN: READY
+
+OK
+SIM déjà prête (READY). Aucun PIN à envoyer.
+Réponse AT+CMGF=1 : AT+CMGF=1
+
+OK
+Réponse AT+CSCS="GSM" : AT+CSCS="GSM"
+
+OK
+Envoi SMS vers +33610135787 ...
+Response AT+CMGS="+33610135787" : AT+CMGS="+33610135787"
+
+>
+Réponse envoi : +CMGS: 110
+
+OK
+SMS envoyé (ou en cours) vers +33610135787 : ALERTE La Freebox n'a plus d'acces a Internet.
+[16/11/2025 10:55:35] Aucune connexion disponible (Freebox + 4G KO)
+[16/11/2025 10:55:35] [SMS] Préparation envoi : ❌ Aucune connexion disponible (ni Freebox, ni 4G).
+[16/11/2025 10:55:39] [SMS] OK : Numéros cibles : +33610135787
+Port série modem : /dev/ttyUSB3
+Message brut   : ❌ Aucune connexion disponible (ni Freebox, ni 4G).
+Message envoyé : ERREUR Aucune connexion disponible (ni Freebox, ni 4G).
+Initialisation modem…
+Reset état modem (sortir d'un éventuel mode SMS)...
+Réponse AT : AT
+
+OK
+Modem OK après reset.
+Réponse AT+CPIN? : AT+CPIN?
+
++CPIN: READY
+
+OK
+SIM déjà prête (READY). Aucun PIN à envoyer.
+Réponse AT+CMGF=1 : AT+CMGF=1
+
+OK
+Réponse AT+CSCS="GSM" : AT+CSCS="GSM"
+
+OK
+Envoi SMS vers +33610135787 ...
+Response AT+CMGS="+33610135787" : AT+CMGS="+33610135787"
+
+>
+Erreur lors de la lecture de la réponse (probable reset USB) : device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+Réponse envoi : 
+SMS envoyé (ou en cours) vers +33610135787 : ERREUR Aucune connexion disponible (ni Freebox, ni 4G).
+[16/11/2025 10:55:39] [4G] Tentative d'activation de la connexion 4G (Freebox KO, 4G KO).
+[16/11/2025 10:55:39] [4G] Lancement du script de connexion 4G...
+[16/11/2025 10:55:46] [4G] Connexion 4G active (ping OK).
+[16/11/2025 10:55:46] [4G] Script connect_4g.sh terminé (rc=0).
+[16/11/2025 10:56:47] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:56:47] Connexion Internet Freebox rétablie
+[16/11/2025 10:56:47] [SMS] Préparation envoi : ✅ La connexion Internet Freebox est rétablie.
+[16/11/2025 10:56:53] [SMS] OK : Numéros cibles : +33610135787
+Port série modem : /dev/ttyUSB3
+Message brut   : ✅ La connexion Internet Freebox est rétablie.
+Message envoyé : OK La connexion Internet Freebox est retablie.
+Initialisation modem…
+Reset état modem (sortir d'un éventuel mode SMS)...
+Réponse AT : AT
+
+OK
+Modem OK après reset.
+Réponse AT+CPIN? : AT+CPIN?
+
++CPIN: READY
+
+OK
+SIM déjà prête (READY). Aucun PIN à envoyer.
+Réponse AT+CMGF=1 : AT+CMGF=1
+
+OK
+Réponse AT+CSCS="GSM" : AT+CSCS="GSM"
+
+OK
+Envoi SMS vers +33610135787 ...
+Response AT+CMGS="+33610135787" : AT+CMGS="+33610135787"
+
+>
+Réponse envoi : +CMGS: 112
+
+OK
+SMS envoyé (ou en cours) vers +33610135787 : OK La connexion Internet Freebox est retablie.
+[16/11/2025 10:56:53] [NET] ip link set wlan0 up (rc=0) 
+[16/11/2025 10:56:53] [NET] ip route replace default via 192.168.0.254 dev eth0 metric 100 (rc=0) 
+[16/11/2025 10:57:54] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:58:55] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 10:59:56] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:00:57] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:01:58] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:02:59] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:04:00] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:05:01] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:06:02] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:07:03] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:08:04] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:09:05] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:10:06] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:11:07] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:12:08] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:13:09] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:14:10] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:15:12] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:16:13] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:17:14] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:18:15] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:19:16] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:20:17] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:21:18] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:22:19] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:23:20] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:24:21] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:25:22] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:26:23] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:27:24] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:28:25] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:29:26] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:30:27] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:31:28] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:32:29] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:33:30] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:34:31] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:35:32] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:36:33] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:37:34] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:38:35] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:39:36] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:40:37] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:40:47] [CONFIG] Logo mis à jour via dashboard
+[16/11/2025 11:41:01] [CONFIG] Logo mis à jour via dashboard
+[16/11/2025 11:41:38] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:42:39] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:43:41] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:44:42] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:45:43] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:46:44] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:47:45] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:48:46] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:49:47] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:50:24] [CONFIG] config.json mise à jour via /config
+[16/11/2025 11:50:48] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:51:09] [BACKUP] Backup créé: failoverpi-backup-20251116-115109.zip
+[16/11/2025 11:51:49] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:52:50] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:53:51] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:54:52] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:55:53] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:56:54] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:57:55] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:58:56] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 11:59:57] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:00:58] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:01:59] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:03:00] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:04:01] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:05:02] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:06:03] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:07:04] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:08:05] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:09:06] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:10:07] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:11:09] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:12:10] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:13:11] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:14:12] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:15:13] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:16:14] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:17:15] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:18:16] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:19:17] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:20:18] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:21:19] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:21:59] [CONFIG] config.json mise à jour via /config
+[16/11/2025 12:22:20] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:23:10] [DASHBOARD] SMS Test → Test dashboard OK ! (16/11/2025)
+[16/11/2025 12:23:21] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:24:22] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:25:23] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:25:49] [BACKUP] Backup supprimé: failoverpi-backup-20251115-170223.zip
+[16/11/2025 12:25:56] [BACKUP] Backup supprimé: failoverpi-backup-20251115-170823.zip
+[16/11/2025 12:26:09] [BACKUP] Backup supprimé: failoverpi-backup-20251115-172332.zip
+[16/11/2025 12:26:19] [BACKUP] Backup supprimé: failoverpi-backup-20251115-173612.zip
+[16/11/2025 12:26:24] [STATUS] Freebox LAN=OK Internet=OK / 4G=KO
+[16/11/2025 12:26:27] [BACKUP] Backup supprimé: failoverpi-backup-20251115-174038.zip
+[16/11/2025 12:26:33] [BACKUP] Backup supprimé: failoverpi-backup-20251115-174847.zip
+[16/11/2025 12:26:38] [BACKUP] Backup supprimé: failoverpi-backup-20251115-183914.zip
+[16/11/2025 12:26:43] [BACKUP] Backup supprimé: failoverpi-backup-20251115-184932.zip
+[16/11/2025 12:26:49] [BACKUP] Backup supprimé: failoverpi-backup-20251116-093753.zip

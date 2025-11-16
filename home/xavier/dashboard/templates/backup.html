@@ -5,50 +5,70 @@
 <div class="card">
     <h3>Sauvegardes disponibles</h3>
 
-    {% if backups and backups|length > 0 %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Nom du backup</th>
-                    <th style="text-align:right;">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for b in backups %}
-                <tr>
-                    <td>{{ b }}</td>
-                    <td style="text-align:right;">
-                        <!-- Télécharger -->
-                        <a class="btn btn-secondary" href="/backup/download/{{ b }}">
-                            ⬇️ Télécharger
-                        </a>
+    {% if backups %}
+<table>
+    <tr>
+        <th style="width: 55%;">Fichier</th>
+        <th style="width: 45%; text-align:center;">Actions</th>
+    </tr>
 
-                        <!-- Restaurer ce backup -->
-                        <a class="btn btn-success"
-                           href="/restore_existing/{{ b }}"
-                           onclick="return confirm('Restaurer le backup {{ b }} et redémarrer le Pi ?');">
-                            ♻️ Restaurer
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    {% for b in backups %}
+    <tr>
+        <td>{{ b }}</td>
+        <td style="text-align:center;">
+
+            <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+
+                <a class="btn btn-secondary"
+                    style="padding:6px 10px; font-size:0.85em; min-width:110px; text-align:center;"
+                    href="{{ url_for('download_backup', name=b) }}">
+                    ⬇️ Télécharger
+                </a>
+
+                <a class="btn btn-success"
+                    style="padding:6px 10px; font-size:0.85em; min-width:110px; text-align:center;"
+                    href="{{ url_for('restore_existing', name=b) }}"
+                    onclick="return confirm('Restaurer {{ b }} ?');">
+                    ♻️ Restaurer
+                </a>
+
+                <a class="btn btn-danger"
+                    style="padding:6px 10px; font-size:0.85em; min-width:110px; text-align:center;"
+                    href="{{ url_for('delete_backup', name=b) }}"
+                    onclick="return confirm('Supprimer {{ b }} ?');">
+                    🗑 Supprimer
+                </a>
+
+            </div>
+
+        </td>
+    </tr>
+    {% endfor %}
+</table>
     {% else %}
-        <p>Aucune sauvegarde trouvée pour l’instant.</p>
+        <p>Aucune sauvegarde pour l’instant.</p>
     {% endif %}
 </div>
 
 <div class="card">
-    <h3>Créer une nouvelle sauvegarde</h3>
-    <a class="btn btn-primary" href="/backup/create">📦 Sauvegarder maintenant</a>
+<h3>Créer une sauvegarde</h3>
+
+<div style="margin-top:10px;">
+    <a class="btn btn-primary" href="{{ url_for('create_backup') }}">
+        📦 Sauvegarder maintenant
+    </a>
+</div>
 </div>
 
 <div class="card">
-    <h3>Restaurer depuis un fichier uploadé</h3>
-    <form action="/restore" method="post" enctype="multipart/form-data">
-        <input type="file" name="zipfile" required>
-        <button class="btn btn-warning">♻️ Restaurer (upload)</button>
+    <h3>Restaurer depuis un fichier</h3>
+    <form action="{{ url_for('restore') }}" method="post" enctype="multipart/form-data">
+        <input type="file" name="backup_file" required>
+        <button class="btn btn-warning"
+                style="padding:8px 12px;font-size:0.9em;"
+                onclick="return confirm('Restaurer ce backup et redémarrer le Pi ?');">
+            ♻️ Restaurer (upload)
+        </button>
     </form>
 </div>
 
