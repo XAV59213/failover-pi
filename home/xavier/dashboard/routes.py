@@ -13,7 +13,6 @@ import subprocess
 import time
 import zipfile
 import shutil
-
 from .utils import (
     log,
     get_gateway,
@@ -36,47 +35,20 @@ from .auth import (
     admin_exists,
 )
 
-
 # ------------------------------------------------------------------
-# Petites pages de retour (succès / erreur)
+# Pages génériques
 # ------------------------------------------------------------------
 def success_page(title, msg, color="#3fb950", btn_color="#58a6ff"):
     return f"""
     <html lang="fr">
-    <head>
-      <meta charset="utf-8">
-      <title>{title}</title>
-      <style>
-        body {{
-          background:#0d1117;
-          color:#c9d1d9;
-          font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          height:100vh;
-        }}
-        .card {{
-          background:#161b22;
-          border:1px solid #30363d;
-          border-radius:12px;
-          padding:24px;
-          max-width:600px;
-          text-align:center;
-        }}
-        h2 {{ color:{color}; margin-bottom:12px; }}
-        p  {{ color:#8b949e; font-size:.95em; }}
-        button {{
-          margin-top:18px;
-          padding:10px 16px;
-          border-radius:8px;
-          border:none;
-          background:{btn_color};
-          color:#fff;
-          font-weight:600;
-          cursor:pointer;
-        }}
-      </style>
+    <head><meta charset="utf-8"><title>{title}</title>
+    <style>
+      body {{background:#0d1117;color:#c9d1d9;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;}}
+      .card {{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:24px;max-width:600px;text-align:center;}}
+      h2 {{color:{color};margin-bottom:12px;}}
+      p {{color:#8b949e;font-size:.95em;}}
+      button {{margin-top:18px;padding:10px 16px;border-radius:8px;border:none;background:{btn_color};color:#fff;font-weight:600;cursor:pointer;}}
+    </style>
     </head>
     <body>
       <div class="card">
@@ -88,10 +60,74 @@ def success_page(title, msg, color="#3fb950", btn_color="#58a6ff"):
     </html>
     """
 
-
 def error_page(title, msg):
     return success_page(title, msg, color="#f85149", btn_color="#f85149")
 
+# ------------------------------------------------------------------
+# Page de confirmation générique (comme backup, sans bouton)
+# ------------------------------------------------------------------
+def confirm_page(title, message, log_entry, redirect_url, delay=4):
+    return f"""
+    <html lang="fr"><head><meta charset="utf-8"><title>{title}</title>
+    <meta http-equiv="refresh" content="{delay};url={redirect_url}">
+    <style>body{{background:#0d1117;color:#c9d1d9;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;}}
+    .card{{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:28px;max-width:600px;text-align:center;}}
+    h2{{color:#3fb950;margin-bottom:16px;}}
+    .msg{{margin:12px 0;font-size:1.05em;}}
+    .file{{font-family:monospace;background:#0d1117;padding:6px 12px;border-radius:6px;display:inline-block;margin:8px 0;}}
+    .log{{color:#8b949e;font-size:0.9em;margin-top:10px;}}
+    .redirect{{margin-top:20px;color:#58a6ff;font-weight:600;}}
+    </style></head><body><div class="card">
+      <h2>{title}</h2>
+      <p class="msg">{message}</p>
+      <p class="log">{log_entry}</p>
+      <p class="redirect">Redirection dans {delay} seconde{'s' if delay > 1 else ''}...</p>
+    </div></body></html>
+    """
+
+# ------------------------------------------------------------------
+# Page de restauration avec compte à rebours
+# ------------------------------------------------------------------
+def restore_wait_page(log_entry, backup_name):
+    return f"""
+    <html lang="fr">
+    <head>
+      <meta charset="utf-8">
+      <title>Restauration en cours</title>
+      <meta http-equiv="refresh" content="10;url={url_for('backup')}" />
+      <style>
+        body {{background:#0d1117;color:#c9d1d9;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;}}
+        .card {{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:32px;max-width:650px;text-align:center;}}
+        h2 {{color:#58a6ff;margin-bottom:16px;}}
+        .file {{font-family:monospace;background:#0d1117;padding:6px 12px;border-radius:6px;display:inline-block;margin:8px 0;}}
+        .log {{color:#8b949e;font-size:0.9em;margin-top:10px;}}
+        .countdown {{margin-top:20px;color:#58a6ff;font-weight:600;font-size:1.1em;}}
+        .spinner {{margin:20px auto;width:40px;height:40px;border:4px solid #30363d;border-top:4px solid #58a6ff;border-radius:50%;animation:spin 1s linear infinite;}}
+        @keyframes spin {{to{{transform:rotate(360deg)}}}}
+      </style>
+      <script>
+        let timeLeft = 10;
+        const countdownEl = document.getElementById('countdown');
+        const interval = setInterval(() => {{
+          timeLeft--;
+          countdownEl.innerText = `Redirection dans ${{timeLeft}} seconde${{timeLeft > 1 ? 's' : ''}}...`;
+          if (timeLeft <= 0) clearInterval(interval);
+        }}, 1000);
+      </script>
+    </head>
+    <body>
+      <div class="card">
+        <h2>Restauration en cours</h2>
+        <div class="spinner"></div>
+        <p><strong>Veuillez patienter</strong>, la restauration nécessite un redémarrage du Pi.</p>
+        <p>Vous serez redirigé et recevrez une <strong>notification SMS</strong> du redémarrage.</p>
+        <p>Fichier : <span class="file">{backup_name}</span></p>
+        <p class="log">{log_entry}</p>
+        <p class="countdown" id="countdown">Redirection dans 10 secondes...</p>
+      </div>
+    </body>
+    </html>
+    """
 
 # ------------------------------------------------------------------
 # Enregistrement des routes
@@ -103,60 +139,39 @@ def register_routes(app):
     UPLOAD_DIR = app.config["UPLOAD_DIR"]
     USERS_DB = app.config["USERS_DB"]
 
-    # ==============================================================
-    #  AUTH / SETUP
-    # ==============================================================
+    # AUTH
     @app.route("/setup", methods=["GET", "POST"])
     def setup():
-        if admin_exists(USERS_DB):
-            return redirect(url_for("login"))
-
+        if admin_exists(USERS_DB): return redirect(url_for("login"))
         error = ""
         if request.method == "POST":
             username = (request.form.get("username") or "").strip()
             password = request.form.get("password") or ""
-
-            if not username or not password:
-                error = "Utilisateur et mot de passe requis."
+            if not username or not password: error = "Utilisateur et mot de passe requis."
             else:
                 data = load_users(USERS_DB)
-                data.setdefault("users", []).append(
-                    {
-                        "username": username,
-                        "password": make_password(password),
-                        "role": "admin",
-                    }
-                )
+                data.setdefault("users", []).append({"username": username, "password": make_password(password), "role": "admin"})
                 if save_users(data, USERS_DB):
                     log(f"[AUTH] Admin créé: {username}", LOG_FILE)
                     return redirect(url_for("login"))
                 error = "Impossible d'enregistrer l'utilisateur."
-
         return render_template("setup.html", error=error)
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
-        if not admin_exists(USERS_DB):
-            return redirect(url_for("setup"))
-
+        if not admin_exists(USERS_DB): return redirect(url_for("setup"))
         error = ""
         if request.method == "POST":
             username = (request.form.get("username") or "").strip()
             password = request.form.get("password") or ""
             user = verify_credentials(username, password, USERS_DB)
-
             if user:
-                session["user"] = {
-                    "username": user["username"],
-                    "role": user.get("role", "admin"),
-                }
+                session["user"] = {"username": user["username"], "role": user.get("role", "admin")}
                 log(f"[AUTH] Connexion: {username}", LOG_FILE)
                 return redirect(url_for("index"))
             else:
                 error = "Identifiants invalides."
-
         return render_template("login.html", error=error)
-
     @app.route("/logout")
     def logout():
         u = session.get("user", {}).get("username", "?")
@@ -164,9 +179,7 @@ def register_routes(app):
         log(f"[AUTH] Déconnexion: {u}", LOG_FILE)
         return redirect(url_for("login"))
 
-    # ==============================================================
-    #  DASHBOARD PRINCIPAL
-    # ==============================================================
+    # DASHBOARD
     @app.route("/")
     @login_required
     def index():
@@ -174,32 +187,23 @@ def register_routes(app):
         signal_text, signal_percent, _ = get_signal()
         logs = get_logs(LOG_FILE)
         times, states = get_freebox_history(LOG_FILE)
+        return render_template("index.html", gw_text=gw_text, signal_text=signal_text, signal_percent=signal_percent,
+                               logs=logs, history_times=json.dumps(times), history_states=json.dumps(states))
 
-        return render_template(
-            "index.html",
-            gw_text=gw_text,
-            signal_text=signal_text,
-            signal_percent=signal_percent,
-            logs=logs,
-            history_times=json.dumps(times),
-            history_states=json.dumps(states),
-        )
-
-    # ==============================================================
-    #  SMS / ACTIONS 4G & FAILOVER
-    # ==============================================================
+    # ACTIONS RÉSEAU (style backup)
     @app.route("/sms")
     @login_required
     def sms():
         msg = f"Test dashboard OK ! ({datetime.now().strftime('%d/%m/%Y')})"
         log_entry = log(f"[DASHBOARD] SMS Test → {msg}", LOG_FILE)
         try:
-            subprocess.run(
-                ["python3", app.config["SMS_SCRIPT"], msg],
-                cwd="/home/xavier",
-                timeout=30,
+            subprocess.run(["python3", app.config["SMS_SCRIPT"], msg], cwd="/home/xavier", timeout=30, check=True)
+            return confirm_page(
+                title="SMS envoyé",
+                message="Le test SMS a été envoyé avec succès.",
+                log_entry=log_entry,
+                redirect_url=url_for('index')
             )
-            return success_page("SMS envoyé", log_entry)
         except Exception as e:
             error = log(f"[DASHBOARD] Erreur SMS: {e}", LOG_FILE)
             return error_page("Erreur SMS", error)
@@ -208,63 +212,45 @@ def register_routes(app):
     @login_required
     def reboot():
         log_entry = log("[ACTION] Reboot 4G demandé via dashboard", LOG_FILE)
-        try:
-            subprocess.Popen(["/home/xavier/connect_4g.sh"])
-            return success_page(
-                "Redémarrage 4G",
-                f"Commande lancée.<br><small>{log_entry}</small>",
-            )
-        except Exception as e:
-            error = log(f"[ERROR] Reboot 4G: {e}", LOG_FILE)
-            return error_page("Erreur Reboot 4G", error)
+        subprocess.Popen(["/home/xavier/connect_4g.sh"])
+        return confirm_page(
+            title="Reboot 4G",
+            message="La commande de redémarrage du modem 4G a été lancée.",
+            log_entry=log_entry,
+            redirect_url=url_for('index')
+        )
 
     @app.route("/test_failover")
     @login_required
     def test_failover():
         gw_text, _ = get_gateway(CONFIG_FILE)
-        msg = (
-            "Test failover manuel - état: "
-            f"{gw_text} ({datetime.now().strftime('%d/%m/%Y %H:%M:%S')})"
-        )
+        msg = f"Test failover manuel - état: {gw_text} ({datetime.now().strftime('%d/%m/%Y %H:%M:%S')})"
         log_entry = log(f"[TEST] {msg}", LOG_FILE)
         try:
-            subprocess.run(
-                ["python3", app.config["SMS_SCRIPT"], msg],
-                cwd="/home/xavier",
-                timeout=30,
-            )
-            return success_page(
-                "Test Failover",
-                f"SMS envoyé.<br><small>{log_entry}</small>",
+            subprocess.run(["python3", app.config["SMS_SCRIPT"], msg], cwd="/home/xavier", timeout=30, check=True)
+            return confirm_page(
+                title="Test Failover",
+                message=f"SMS envoyé : <strong>{gw_text}</strong>",
+                log_entry=log_entry,
+                redirect_url=url_for('index')
             )
         except Exception as e:
-            error = log(f"[TEST] Erreur test failover: {e}", LOG_FILE)
+            error = log(f"[TEST] Erreur envoi SMS: {e}", LOG_FILE)
             return error_page("Erreur Test Failover", error)
 
     @app.route("/clear_logs")
     @admin_required
     def clear_logs():
-        try:
-            open(LOG_FILE, "w").close()
-            history_file = "/home/xavier/status_history.json"
-            try:
-                with open(history_file, "w") as f:
-                    f.write('{"times":[],"states":[]}')
-            except Exception:
-                pass
-            log_entry = log("[ACTION] Logs effacés via dashboard", LOG_FILE)
-            return success_page("Logs effacés", log_entry)
-        except Exception as e:
-            error = log(f"[ERROR] Clear logs: {e}", LOG_FILE)
-            return error_page("Erreur Clear Logs", error)
+        open(LOG_FILE, "w").close()
+        with open("/home/xavier/status_history.json", "w") as f: f.write('{"times":[],"states":[]}')
+        log_entry = log("[ACTION] Logs effacés via dashboard", LOG_FILE)
+        return success_page("Logs effacés", log_entry)
 
-    # ==============================================================
-    #  BACKUP / RESTORE
-    # ==============================================================
+    # BACKUP
     @app.route("/backup")
     @admin_required
     def backup():
-        backups = list_backups(app.config["BACKUP_DIR"])
+        backups = list_backups(BACKUP_DIR)
         return render_template("backup.html", backups=backups)
 
     @app.route("/backup/create")
@@ -272,15 +258,11 @@ def register_routes(app):
     def create_backup():
         ts = datetime.now().strftime("%Y%m%d-%H%M%S")
         backup_name = f"failoverpi-backup-{ts}.zip"
-        backup_path = os.path.join(app.config["BACKUP_DIR"], backup_name)
+        backup_path = os.path.join(BACKUP_DIR, backup_name)
         base_home = "/home/xavier"
-
         try:
             with zipfile.ZipFile(backup_path, "w", zipfile.ZIP_DEFLATED) as z:
-                def add_if_exists(path, arcname=None):
-                    if os.path.exists(path):
-                        z.write(path, arcname or path)
-
+                def add_if_exists(p, a=None): os.path.exists(p) and z.write(p, a or p)
                 add_if_exists(os.path.join(base_home, "config.json"), "home/xavier/config.json")
                 add_if_exists(os.path.join(base_home, "monitor_failover.py"), "home/xavier/monitor_failover.py")
                 add_if_exists(os.path.join(base_home, "run_dashboard.py"), "home/xavier/run_dashboard.py")
@@ -289,320 +271,252 @@ def register_routes(app):
                 add_if_exists(os.path.join(base_home, "status_history.json"), "home/xavier/status_history.json")
                 add_if_exists(os.path.join(base_home, "monitor.log"), "home/xavier/monitor.log")
                 add_if_exists(os.path.join(base_home, ".dashboard_users.json"), "home/xavier/.dashboard_users.json")
-
                 dash_dir = os.path.join(base_home, "dashboard")
                 if os.path.isdir(dash_dir):
-                    for root, dirs, files in os.walk(dash_dir):
-                        if ".git" in root:
-                            continue
+                    for root, _, files in os.walk(dash_dir):
+                        if ".git" in root: continue
                         for f in files:
                             full = os.path.join(root, f)
-                            rel = os.path.relpath(full, base_home)
-                            arc = os.path.join("home/xavier", rel)
+                            arc = os.path.join("home/xavier", os.path.relpath(full, base_home))
                             z.write(full, arc)
 
-            log_entry = log(f"[BACKUP] Backup créé: {backup_name}", app.config["LOG_FILE"])
-            return success_page("Backup créé", f"Fichier : {backup_name}<br><small>{log_entry}</small>")
+            # Envoi SMS
+            sms_msg = f"Backup créé : {backup_name} ({datetime.now().strftime('%d/%m/%Y %H:%M')})"
+            log_entry = log(f"[BACKUP] Backup + SMS → {sms_msg}", LOG_FILE)
+            try:
+                subprocess.run(["python3", app.config["SMS_SCRIPT"], sms_msg], cwd="/home/xavier", timeout=30, check=True)
+            except Exception as e:
+                log(f"[BACKUP] Erreur envoi SMS: {e}", LOG_FILE)
 
+            return confirm_page(
+                title="Backup créé",
+                message=f"Fichier : <span class='file'>{backup_name}</span><br><strong>SMS envoyé !</strong>",
+                log_entry=log_entry,
+                redirect_url=url_for('backup')
+            )
         except Exception as e:
-            error = log(f"[BACKUP] Erreur backup: {e}", app.config["LOG_FILE"])
+            error = log(f"[BACKUP] Erreur backup: {e}", LOG_FILE)
             return error_page("Erreur Backup", error)
-
-    @app.route("/backup/download/<name>")
-    @login_required
-    def download_backup(name):
-        safe_name = os.path.basename(name)
-        path = os.path.join(app.config["BACKUP_DIR"], safe_name)
-        if not os.path.exists(path):
-            return error_page("Backup introuvable", safe_name)
-        return send_file(path, as_attachment=True)
 
     @app.route("/backup/delete/<name>")
     @admin_required
     def delete_backup(name):
         safe_name = os.path.basename(name)
-        path = os.path.join(app.config["BACKUP_DIR"], safe_name)
-        if not os.path.exists(path):
-            return error_page("Backup introuvable", safe_name)
+        path = os.path.join(BACKUP_DIR, safe_name)
+        if not os.path.exists(path): return error_page("Backup introuvable", safe_name)
         try:
             os.remove(path)
-            log_entry = log(f"[BACKUP] Backup supprimé: {safe_name}", app.config["LOG_FILE"])
-            return success_page("Backup supprimé", log_entry)
+            log_entry = log(f"[BACKUP] Backup supprimé: {safe_name}", LOG_FILE)
+            return confirm_page(
+                title="Backup supprimé",
+                message=f"Fichier : <span class='file'>{safe_name}</span>",
+                log_entry=log_entry,
+                redirect_url=url_for('backup')
+            )
         except Exception as e:
-            error = log(f"[BACKUP] Erreur suppression backup: {e}", app.config["LOG_FILE"])
+            error = log(f"[BACKUP] Erreur suppression: {e}", LOG_FILE)
             return error_page("Erreur Suppression Backup", error)
 
+    @app.route("/backup/download/<name>")
+    @login_required
+    def download_backup(name):
+        path = os.path.join(BACKUP_DIR, os.path.basename(name))
+        return send_file(path, as_attachment=True) if os.path.exists(path) else error_page("Introuvable", name)
+
+    # Fonction de restauration
+    def _restore_from_zip(zip_path):
+        base_home = "/home/xavier"
+        extract_dir = "/tmp/restore_temp"
+        if os.path.exists(extract_dir): shutil.rmtree(extract_dir)
+        os.makedirs(extract_dir, exist_ok=True)
+        with zipfile.ZipFile(zip_path, "r") as z: z.extractall(extract_dir)
+        for root, _, files in os.walk(extract_dir):
+            for f in files:
+                src = os.path.join(root, f)
+                rel = os.path.relpath(src, extract_dir)
+                dest = os.path.join(base_home, rel.replace("home/xavier/", "", 1))
+                os.makedirs(os.path.dirname(dest), exist_ok=True)
+                shutil.copy2(src, dest)
+        shutil.rmtree(extract_dir)
+
+    # Restauration via upload
     @app.route("/restore", methods=["POST"])
     @admin_required
     def restore():
         file = request.files.get("backup_file")
-        if not file:
-            return error_page("Aucun fichier", "Aucun fichier de backup fourni.")
-        if not file.filename.lower().endswith(".zip"):
-            return error_page("Format invalide", "Le fichier doit être un .zip")
-
-        upload_dir = app.config["UPLOAD_DIR"]
-        os.makedirs(upload_dir, exist_ok=True)
-        dest_path = os.path.join(upload_dir, f"upload-{int(time.time())}.zip")
+        if not file or not file.filename.lower().endswith(".zip"):
+            return error_page("Erreur", "Fichier .zip requis.")
+        dest_path = os.path.join(UPLOAD_DIR, f"upload-{int(time.time())}.zip")
         file.save(dest_path)
-
         try:
             _restore_from_zip(dest_path)
-            log_entry = log(
-                f"[RESTORE] Backup restauré depuis upload: {os.path.basename(dest_path)}",
-                app.config["LOG_FILE"],
-            )
+            log_entry = log(f"[RESTORE] Restauration depuis upload: {os.path.basename(dest_path)}", LOG_FILE)
+            subprocess.Popen(["sudo", "reboot"])
+            return restore_wait_page(log_entry, os.path.basename(dest_path))
         except Exception as e:
-            error = log(f"[RESTORE] Erreur restauration: {e}", app.config["LOG_FILE"])
+            error = log(f"[RESTORE] Erreur: {e}", LOG_FILE)
             return error_page("Erreur Restauration", error)
 
-        try:
-            subprocess.Popen(["sudo", "reboot"])
-        except Exception as e:
-            log(f"[RESTORE] Erreur lors du reboot: {e}", app.config["LOG_FILE"])
-
-        return success_page(
-            "Restauration en cours",
-            f"Backup restauré, le Pi va redémarrer.<br><small>{log_entry}</small>",
-        )
-
+    # Restauration depuis backup existant
     @app.route("/backup/restore_existing/<name>")
     @admin_required
     def restore_existing(name):
-        safe_name = os.path.basename(name)
-        path = os.path.join(app.config["BACKUP_DIR"], safe_name)
-        if not os.path.exists(path):
-            return error_page("Backup introuvable", safe_name)
-
+        path = os.path.join(BACKUP_DIR, os.path.basename(name))
+        if not os.path.exists(path): return error_page("Backup introuvable", name)
         try:
             _restore_from_zip(path)
-            log_entry = log(f"[RESTORE] Backup restauré: {safe_name}", app.config["LOG_FILE"])
+            log_entry = log(f"[RESTORE] Restauration: {os.path.basename(name)}", LOG_FILE)
+            subprocess.Popen(["sudo", "reboot"])
+            return restore_wait_page(log_entry, os.path.basename(name))
         except Exception as e:
-            error = log(f"[RESTORE] Erreur restauration: {e}", app.config["LOG_FILE"])
+            error = log(f"[RESTORE] Erreur: {e}", LOG_FILE)
             return error_page("Erreur Restauration", error)
 
-        try:
-            subprocess.Popen(["sudo", "reboot"])
-        except Exception as e:
-            log(f"[RESTORE] Erreur lors du reboot: {e}", app.config["LOG_FILE"])
-
-        return success_page(
-            "Restauration en cours",
-            f"Backup {safe_name} restauré, le Pi va redémarrer.<br><small>{log_entry}</small>",
-        )
-
-    # ==============================================================
-    #  REBOOT / SHUTDOWN PI
-    # ==============================================================
+    # REBOOT / SHUTDOWN
     @app.route("/reboot_pi")
     @admin_required
     def reboot_pi():
-        log_entry = log("[ACTION] Reboot Pi demandé via dashboard", LOG_FILE)
-        try:
-            subprocess.Popen(["sudo", "reboot"])
-            return success_page(
-                "Reboot Pi",
-                f"Redémarrage en cours...<br><small>{log_entry}</small>",
-            )
-        except Exception as e:
-            error = log(f"[ERROR] Reboot Pi: {e}", LOG_FILE)
-            return error_page("Erreur Reboot Pi", error)
-
-    @app.route("/shutdown_pi")
-    @admin_required
-    def shutdown_pi():
-        log_entry = log("[ACTION] Shutdown Pi demandé via dashboard", LOG_FILE)
-        try:
-            subprocess.Popen(["sudo", "shutdown", "-h", "now"])
-            return success_page(
-                "Shutdown Pi",
-                f"Arrêt en cours...<br><small>{log_entry}</small>",
-            )
-        except Exception as e:
-            error = log(f"[ERROR] Shutdown Pi: {e}", LOG_FILE)
-            return error_page("Erreur Shutdown Pi", error)
-
-    # ==============================================================
-    #  DIAGNOSTICS
-    # ==============================================================
+        log_entry = log("[ACTION] Reboot Pi demandé", LOG_FILE)
+        subprocess.Popen(["sudo", "reboot"])
+        return f"""
+        <html lang="fr">
+        <head>
+          <meta charset="utf-8">
+          <title>Reboot Pi</title>
+          <meta http-equiv="refresh" content="20;url={url_for('index')}">
+          <style>
+            body {{background:#0d1117;color:#c9d1d9;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;}}
+            .card {{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:32px;max-width:650px;text-align:center;}}
+            h2 {{color:#3fb950;margin-bottom:16px;}}
+            .msg {{margin:12px 0;font-size:1.05em;}}
+            .log {{color:#8b949e;font-size:0.9em;margin-top:10px;}}
+            .countdown {{margin-top:20px;color:#58a6ff;font-weight:600;font-size:1.1em;}}
+            .spinner {{margin:20px auto;width:40px;height:40px;border:4px solid #30363d;border-top:4px solid #58a6ff;border-radius:50%;animation:spin 1s linear infinite;}}
+            @keyframes spin {{to{{transform:rotate(360deg)}}}}
+          </style>
+          <script>
+            let timeLeft = 20;
+            const countdownEl = document.getElementById('countdown');
+            const interval = setInterval(() => {{
+              timeLeft--;
+              countdownEl.innerText = `Redirection dans ${{timeLeft}} seconde${{timeLeft > 1 ? 's' : ''}}...`;
+              if (timeLeft <= 0) clearInterval(interval);
+            }}, 1000);
+          </script>
+        </head>
+        <body>
+          <div class="card">
+            <h2>Reboot Pi</h2>
+            <div class="spinner"></div>
+            <p class="msg">Le Raspberry Pi va redémarrer dans quelques instants.</p>
+            <p class="log">{log_entry}</p>
+            <p class="countdown" id="countdown">Redirection dans 20 secondes...</p>
+          </div>
+        </body>
+        </html>
+        """
+    # CONFIG / USERS
     @app.route("/diagnostics")
     @admin_required
     def diagnostics():
-        checks = check_dependencies(app.config)
-        return render_template("diagnostics.html", checks=checks)
+        return render_template("diagnostics.html", checks=check_dependencies(app.config))
 
-    # ==============================================================
-    #  /config : édition APN, gateway, serial, PIN, port, téléphones
-    # ==============================================================
     @app.route("/config", methods=["GET", "POST"])
     @admin_required
     def edit_config():
         cfg = load_config(CONFIG_FILE)
-        message = ""
-        error = ""
-
+        message = error = ""
         if request.method == "POST":
-            try:
-                cfg["apn"] = request.form.get("apn", cfg.get("apn", "free")).strip()
-                cfg["sim_pin"] = request.form.get("sim_pin", cfg.get("sim_pin", "")).strip()
-                cfg["sms_phone"] = request.form.get("sms_phone", cfg.get("sms_phone", "")).strip()
-                cfg["gateway"] = request.form.get("gateway", cfg.get("gateway", "192.168.0.254")).strip()
-                cfg["serial_port"] = request.form.get("serial_port", cfg.get("serial_port", "/dev/ttyUSB3")).strip()
+            cfg["apn"] = request.form.get("apn", cfg.get("apn", "free")).strip()
+            cfg["sim_pin"] = request.form.get("sim_pin", cfg.get("sim_pin", "")).strip()
+            cfg["sms_phone"] = request.form.get("sms_phone", cfg.get("sms_phone", "")).strip()
+            cfg["gateway"] = request.form.get("gateway", cfg.get("gateway", "192.168.0.254")).strip()
+            cfg["serial_port"] = request.form.get("serial_port", cfg.get("serial_port", "/dev/ttyUSB3")).strip()
+            recipients = [l.strip() for l in request.form.get("sms_recipients", "").splitlines() if l.strip()]
+            cfg["sms_recipients"] = recipients
+            if recipients: cfg["sms_phone"] = recipients[0]
+            try: cfg["port"] = int(request.form.get("port", str(cfg.get("port", 5123))))
+            except: pass
+            if save_config(cfg, CONFIG_FILE):
+                message = "Configuration sauvegardée."
+                log("[CONFIG] Mise à jour via /config", LOG_FILE)
+            else:
+                error = "Échec sauvegarde."
+        recipients_preview = "\n".join(cfg.get("sms_recipients", []) or [cfg.get("sms_phone", "")])
+        logo_exists = os.path.isfile(os.path.join(app.static_folder, 'img', 'logo.png'))
+        return render_template("config.html", cfg=cfg, message=message, error=error, recipients_preview=recipients_preview, logo_exists=logo_exists)
 
-                raw_list = request.form.get("sms_recipients", "")
-                recipients = [line.strip() for line in raw_list.splitlines() if line.strip()]
-                cfg["sms_recipients"] = recipients
-                if recipients:
-                    cfg["sms_phone"] = recipients[0]
-
-                port_str = request.form.get("port", str(cfg.get("port", 5123))).strip()
-                try:
-                    cfg["port"] = int(port_str)
-                except ValueError:
-                    pass
-
-                if save_config(cfg, CONFIG_FILE):
-                    message = "Configuration sauvegardée. Un redémarrage du service dashboard peut être nécessaire."
-                    log("[CONFIG] config.json mise à jour via /config", LOG_FILE)
-                else:
-                    error = "Impossible d'enregistrer la configuration."
-
-            except Exception as e:
-                error = f"Erreur lors de la mise à jour : {e}"
-
-        recipients_preview = "\n".join(
-            cfg.get("sms_recipients", [])
-            or ([cfg.get("sms_phone")] if cfg.get("sms_phone") else [])
-        )
-
-        # Vérifier si le logo existe
-        logo_path = os.path.join(app.static_folder, 'img', 'logo.png')
-        logo_exists = os.path.isfile(logo_path)
-
-        return render_template(
-            "config.html",
-            cfg=cfg,
-            message=message,
-            error=error,
-            recipients_preview=recipients_preview,
-            logo_exists=logo_exists,
-        )
-
-    # ==============================================================
-    #  /config/template : upload du logo
-    # ==============================================================
     @app.route('/config/template', methods=['POST'])
     @admin_required
     def config_template():
-        if 'logo' not in request.files:
-            return redirect(url_for('edit_config'))
-
+        if 'logo' not in request.files: return redirect(url_for('edit_config'))
         file = request.files['logo']
-        if file.filename == '':
-            return redirect(url_for('edit_config'))
-
-        if file and file.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+        if file.filename and file.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
             logo_path = os.path.join(app.static_folder, 'img', 'logo.png')
             os.makedirs(os.path.dirname(logo_path), exist_ok=True)
             file.save(logo_path)
-            log("[CONFIG] Logo mis à jour via dashboard", LOG_FILE)
-
+            log("[CONFIG] Logo mis à jour", LOG_FILE)
         return redirect(url_for('edit_config'))
 
-    # ==============================================================
-    #  /account : changer son mot de passe
-    # ==============================================================
     @app.route("/account", methods=["GET", "POST"])
     @login_required
     def account():
-        current_user = session.get("user", {})
-        username = current_user.get("username")
-        message = ""
-        error = ""
-
+        username = session["user"]["username"]
+        message = error = ""
         if request.method == "POST":
-            current_password = request.form.get("old_pass", "") or request.form.get("current_password", "")
-            new_password = request.form.get("new_pass", "") or request.form.get("new_password", "")
-
-            if not new_password:
-                error = "Nouveau mot de passe requis."
+            old = request.form.get("old_pass") or request.form.get("current_password", "")
+            new = request.form.get("new_pass") or request.form.get("new_password", "")
+            if not new: error = "Nouveau mot de passe requis."
+            elif not verify_credentials(username, old, USERS_DB): error = "Mot de passe actuel incorrect."
             else:
-                if not verify_credentials(username, current_password, USERS_DB):
-                    error = "Mot de passe actuel incorrect."
+                data = load_users(USERS_DB)
+                for u in data["users"]:
+                    if u["username"] == username:
+                        u["password"] = make_password(new)
+                        break
+                if save_users(data, USERS_DB):
+                    message = "Mot de passe mis à jour."
+                    log(f"[AUTH] MDP changé: {username}", LOG_FILE)
                 else:
-                    data = load_users(USERS_DB)
-                    for u in data.get("users", []):
-                        if u.get("username") == username:
-                            u["password"] = make_password(new_password)
-                            break
-                    if save_users(data, USERS_DB):
-                        message = "Mot de passe mis à jour."
-                        log(f"[AUTH] Mot de passe changé pour {username}", LOG_FILE)
-                    else:
-                        error = "Impossible de sauvegarder le nouveau mot de passe."
-
+                    error = "Échec sauvegarde."
         return render_template("account.html", msg=message, error=error)
 
-    # ==============================================================
-    #  /users : gestion multi-comptes (ADMIN uniquement)
-    # ==============================================================
     @app.route("/users", methods=["GET", "POST"])
     @admin_required
     def users():
         data = load_users(USERS_DB)
         users_list = data.get("users", [])
-        message = ""
-        error = ""
-
+        message = error = ""
         if request.method == "POST":
             action = request.form.get("action")
-
             if action == "add":
-                new_username = (request.form.get("username") or "").strip() or (request.form.get("new_username") or "").strip()
-                new_password = request.form.get("password") or request.form.get("new_password") or ""
+                uname = (request.form.get("username") or request.form.get("new_username") or "").strip()
+                pwd = request.form.get("password") or request.form.get("new_password") or ""
                 role = request.form.get("role") or "user"
-                if not new_username or not new_password:
-                    error = "Nom et mot de passe requis."
-                elif role not in ("admin", "user"):
-                    error = "Rôle invalide."
-                elif any(u.get("username") == new_username for u in users_list):
-                    error = "Cet utilisateur existe déjà."
+                if not uname or not pwd: error = "Nom et mot de passe requis."
+                elif role not in ("admin", "user"): error = "Rôle invalide."
+                elif any(u["username"] == uname for u in users_list): error = "Utilisateur existe déjà."
                 else:
-                    users_list.append(
-                        {
-                            "username": new_username,
-                            "password": make_password(new_password),
-                            "role": role,
-                        }
-                    )
+                    users_list.append({"username": uname, "password": make_password(pwd), "role": role})
                     data["users"] = users_list
                     if save_users(data, USERS_DB):
-                        message = f"Utilisateur {new_username} créé."
-                        log(f"[USERS] Création utilisateur {new_username} ({role})", LOG_FILE)
+                        message = f"Utilisateur {uname} créé."
+                        log(f"[USERS] Création: {uname} ({role})", LOG_FILE)
                     else:
-                        error = "Erreur lors de l'enregistrement."
-
+                        error = "Échec enregistrement."
             elif action == "delete":
-                username = request.form.get("username") or ""
-                if not username:
-                    error = "Utilisateur non spécifié."
+                uname = request.form.get("username") or ""
+                if not uname: error = "Utilisateur non spécifié."
                 else:
-                    tgt = next((u for u in users_list if u.get("username") == username), None)
-                    if not tgt:
-                        error = "Utilisateur introuvable."
+                    tgt = next((u for u in users_list if u["username"] == uname), None)
+                    if not tgt: error = "Utilisateur introuvable."
+                    elif tgt["role"] == "admin" and count_admins(USERS_DB) <= 1: error = "Impossible de supprimer le dernier admin."
                     else:
-                        if tgt.get("role") == "admin" and count_admins(USERS_DB) <= 1:
-                            error = "Impossible de supprimer le dernier admin."
+                        users_list = [u for u in users_list if u["username"] != uname]
+                        data["users"] = users_list
+                        if save_users(data, USERS_DB):
+                            message = f"Utilisateur {uname} supprimé."
+                            log(f"[USERS] Suppression: {uname}", LOG_FILE)
                         else:
-                            users_list = [u for u in users_list if u.get("username") != username]
-                            data["users"] = users_list
-                            if save_users(data, USERS_DB):
-                                message = f"Utilisateur {username} supprimé."
-                                log(f"[USERS] Suppression utilisateur {username}", LOG_FILE)
-                            else:
-                                error = "Erreur lors de la suppression."
-
-        data = load_users(USERS_DB)
-        users_list = data.get("users", [])
-
-        return render_template("users.html", users=users_list, msg=message, error=error)
+                            error = "Échec suppression."
+        return render_template("users.html", users=load_users(USERS_DB).get("users", []), msg=message, error=error)
