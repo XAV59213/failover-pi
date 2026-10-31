@@ -1,5 +1,7 @@
 ![Failover Pi](https://raw.githubusercontent.com/XAV59213/failover-pi/main/img/E09654EF-A775-4929-B87B-03CD3E1302D3.png)
 # Failover-Pi  
+
+[![Buy Me A Coffee](https://img.buymeacoffee.com/button-api/?text=xav59213&emoji=&slug=xav59213&button_colour=5F7FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00)](https://www.buymeacoffee.com/xav59213)
 Système complet de bascule automatique Freebox → 4G (SIM7600E)  
 avec Dashboard Web, sauvegardes, restauration et supervision.
 
